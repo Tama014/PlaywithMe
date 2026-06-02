@@ -6,6 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <title>Game Berlangsung</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         :root {
             --bg-color: #fffffe;
@@ -777,7 +778,7 @@
     let unsubSesi = null;
     let maxSkor   = 0;
 
-    if (!pin) { alert('PIN tidak ditemukan.'); window.location.href = 'dashboard-guru.html'; }
+    if (!pin) { notify('PIN tidak ditemukan.', 'error'); setTimeout(() => window.location.href = 'dashboard-guru.html', 1800); }
 
     // ===== SWITCH VIEW =====
     window.switchView = function(view) {
@@ -808,14 +809,14 @@
         try {
             const sesiRef  = doc(db, "sesi", pin);
             const sesiSnap = await getDoc(sesiRef);
-            if (!sesiSnap.exists()) { alert('Sesi tidak ditemukan.'); window.location.href = 'dashboard-guru.html'; return; }
+            if (!sesiSnap.exists()) { notify('Sesi tidak ditemukan.', 'error'); setTimeout(() => window.location.href = 'dashboard-guru.html', 1800); return; }
             const sesiData = sesiSnap.data();
 
             document.getElementById('judulKuisTop').innerHTML =
                 `<lottie-player src="quiz-list.json" background="transparent" speed="1" style="width:20px;height:20px;flex-shrink:0;" loop autoplay></lottie-player><span>${sesiData.judul_kuis}</span>`;
 
             const kuisSnap = await getDoc(doc(db, "kuis", sesiData.kuis_id));
-            if (!kuisSnap.exists()) { alert('Data kuis tidak ditemukan.'); return; }
+            if (!kuisSnap.exists()) { notify('Data kuis tidak ditemukan.', 'error'); return; }
 
             soalList = kuisSnap.data().soal;
             maxSkor  = soalList.length * 100;
@@ -831,7 +832,7 @@
             startSesiListener();
         } catch (err) {
             console.error('❌ [Game Guru] Init error:', err);
-            alert('Gagal memuat game: ' + err.message);
+            notify('Gagal memuat game: ' + err.message, 'error');
         }
     }
 
@@ -1074,7 +1075,7 @@
             // Simpan hasil_final + ubah status selesai dalam satu operasi
             await updateDoc(sesiRef, { hasil_final: hasilFinal, status: 'selesai' });
         } catch (err) {
-            alert('Gagal mengakhiri game: ' + err.message);
+            notify('Gagal mengakhiri game: ' + err.message, 'error');
         }
     };
 

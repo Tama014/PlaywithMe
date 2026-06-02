@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
+    <link rel="preload" as="audio" href="correct.mp3">
+    <link rel="preload" as="audio" href="fahh.mp3">
+    <link rel="preload" as="fetch" href="check-box.json" crossorigin>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
     <script src="notify.js" defer></script>
     <script>typeof window.notify==='undefined'&&(window.notify=function(m,t){if(t!=='success'&&t!=='info')alert(m);},window.pwmClose=function(){});</script>
@@ -543,9 +546,6 @@
 <!-- Popup Pemenang -->
 <div class="winner-overlay" id="winnerOverlay">
     <div class="winner-top">
-        <lottie-player src="confetti.json" background="transparent" speed="1"
-            style="width: 110px; height: 110px;" loop autoplay>
-        </lottie-player>
         <h1>Game Berakhir!</h1>
         <p id="winnerSubtitle">Ini dia juara kelas!</p>
     </div>
@@ -611,16 +611,15 @@
     }
 
     // ===== AUDIO =====
-    const sfxCorrect = new Audio('correct.mp3');
-    sfxCorrect.currentTime = 2;
-
-    const sfxWrong = new Audio('fahh.mp3');
+    let sfxCorrect = null, sfxWrong = null;
 
     function playCorrect() {
+        if (!sfxCorrect) sfxCorrect = new Audio('correct.mp3');
         sfxCorrect.currentTime = 2;
         sfxCorrect.play().catch(() => {});
     }
     function playWrong() {
+        if (!sfxWrong) sfxWrong = new Audio('fahh.mp3');
         sfxWrong.currentTime = 0;
         sfxWrong.play().catch(() => {});
     }
@@ -661,13 +660,19 @@
     }
 
     // ===== MUAT SOAL =====
+    const cachedKuisId = sessionStorage.getItem('kuis_id_current');
+
     async function muatSoal() {
         try {
-            const sesiSnap = await getDoc(doc(db, "sesi", pin));
+            // Fire both reads in parallel when kuis_id is already known from lobby
+            const sesiPromise = getDoc(doc(db, "sesi", pin));
+            const kuisPromise = cachedKuisId ? getDoc(doc(db, "kuis", cachedKuisId)) : null;
+
+            const sesiSnap = await sesiPromise;
             if (!sesiSnap.exists()) { notify('Sesi tidak ditemukan.', 'error'); return; }
             const sesiData = sesiSnap.data();
 
-            const kuisSnap = await getDoc(doc(db, "kuis", sesiData.kuis_id));
+            const kuisSnap = await (kuisPromise || getDoc(doc(db, "kuis", sesiData.kuis_id)));
             if (!kuisSnap.exists()) { notify('Kuis tidak ditemukan.', 'error'); return; }
 
             soalList = kuisSnap.data().soal;
@@ -882,6 +887,18 @@
     function tampilkanPemenang(hasilFinal) {
         document.getElementById('finishScreen').classList.remove('show');
         document.getElementById('winnerOverlay').classList.add('show');
+
+        const winnerTop = document.querySelector('.winner-top');
+        if (!winnerTop.querySelector('lottie-player')) {
+            const el = document.createElement('lottie-player');
+            el.src = 'confetti.json';
+            el.setAttribute('background', 'transparent');
+            el.setAttribute('speed', '1');
+            el.style.cssText = 'width:110px;height:110px;';
+            el.setAttribute('loop', '');
+            el.setAttribute('autoplay', '');
+            winnerTop.insertBefore(el, winnerTop.firstChild);
+        }
 
         const podiumEl = document.getElementById('winnerPodium');
         podiumEl.innerHTML = '';

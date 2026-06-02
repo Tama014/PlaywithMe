@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>PlaywithME</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--paragraph-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            padding: 12px 40px;
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 0 var(--stroke-color);
+        }
+
+        .header-brand {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--headline-color);
+            letter-spacing: -0.5px;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            background-color: var(--headline-color);
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            padding: 80px 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            border-bottom: 3px solid var(--stroke-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle radial glow behind animation */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 500px; height: 400px;
+            background: radial-gradient(ellipse, rgba(255,216,3,0.07) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-lottie { position: relative; z-index: 1; }
+
+        .hero-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--tertiary-color);
+            opacity: 0.8;
+        }
+
+        .hero h2 {
+            font-size: 50px;
+            font-weight: 900;
+            color: var(--button-bg);
+            line-height: 1.12;
+            position: relative;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: rgba(255,255,255,0.55);
+            max-width: 440px;
+            line-height: 1.75;
+        }
+
+        .hero-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .hero-divider span {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.25);
+        }
+        .hero-divider::before,
+        .hero-divider::after {
+            content: '';
+            width: 40px; height: 1px;
+            background: rgba(255,255,255,0.12);
+        }
+
+        /* ===== ROLE SECTION ===== */
+        .role-section {
+            padding: 72px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 44px;
+            background-color: var(--bg-color);
+            flex: 1;
+        }
+
+        .role-section-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--paragraph-color);
+            opacity: 0.4;
+        }
+
+        .role-section h2 {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--headline-color);
+            line-height: 1.2;
+        }
+
+        .role-section .subtitle {
+            font-size: 15px;
+            color: var(--paragraph-color);
+            opacity: 0.65;
+            line-height: 1.6;
+        }
+
+        /* Role Grid */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 28px;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .role-card {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 8px 8px 0 var(--stroke-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .role-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 12px 14px 0 var(--stroke-color);
+        }
+
+        .role-card-top {
+            padding: 32px 28px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+        .role-card.student .role-card-top { background: var(--secondary-color); }
+        .role-card.teacher .role-card-top { background: var(--button-bg); }
+
+        .role-tag {
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--headline-color);
+            background: rgba(39,35,67,0.08);
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1.5px solid rgba(39,35,67,0.12);
+        }
+
+        .role-card-body {
+            padding: 22px 28px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex: 1;
+            border-top: 3px solid var(--stroke-color);
+        }
+
+        .role-card h3 {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--headline-color);
+        }
+
+        .role-card .role-desc {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--paragraph-color);
+            flex: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 3px solid var(--stroke-color);
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+            transition: all 0.1s;
+        }
+        .btn:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--stroke-color); }
+        .btn:active { transform: translate(4px,4px); box-shadow: none; }
+        .btn-outline { background-color: var(--bg-color); }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 22px 40px;
+            border-top: 3px solid var(--stroke-color);
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--paragraph-color);
+            opacity: 0.55;
+            background-color: var(--bg-color);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            header { padding: 12px 20px; }
+            .hero { padding: 56px 20px; }
+            .hero h2 { font-size: 34px; }
+            .role-section { padding: 52px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <lottie-player src="PlaywithMe.json" background="transparent" speed="1"
+        style="width: 46px; height: 46px;" loop autoplay>
+    </lottie-player>
+    <span class="header-brand">PlaywithME</span>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-lottie">
+        <lottie-player src="hello.json" background="transparent" speed="1"
+            style="width: 160px; height: 160px;" loop autoplay>
+        </lottie-player>
+    </div>
+    <div class="hero-eyebrow">Game Edukasi Susun Kata</div>
+    <h2>PlaywithMe</h2>
+    <p>Platform kuis interaktif untuk guru dan siswa. Buat kuis, bagikan PIN, dan mulai bermain bersama.</p>
+    <div class="hero-divider"><span>Pilih peranmu di bawah</span></div>
+</section>
+
+<!-- ROLE SELECTION -->
+<section class="role-section">
+    <div class="role-section-header">
+        <div class="section-eyebrow">Mulai Bermain</div>
+        <h2>Kamu siapa hari ini?</h2>
+        <p class="subtitle">Pilih peranmu untuk masuk ke dalam permainan.</p>
+    </div>
+
+    <div class="role-grid">
+
+        <!-- SISWA -->
+        <div class="role-card student">
+            <div class="role-card-top">
+                <div class="role-tag">Siswa</div>
+                <lottie-player src="student.json" background="transparent" speed="1"
+                    style="width: 120px; height: 120px;" loop autoplay>
+                </lottie-player>
+            </div>
+            <div class="role-card-body">
+                <h3>Masuk Sebagai Siswa</h3>
+                <p class="role-desc">Punya kode PIN dari gurumu? Masuk ke ruang kelas dan mulai susun kata bersama teman!</p>
+                <button class="btn" onclick="window.location.href='login-siswa.html'">Masuk dengan PIN / QR</button>
+            </div>
+        </div>
+
+        <!-- GURU -->
+        <div class="role-card teacher">
+            <div class="role-card-top">
+                <div class="role-tag">Guru</div>
+                <lottie-player src="teacher.json" background="transparent" speed="1"
+                    style="width: 120px; height: 120px;" loop autoplay>
+                </lottie-player>
+            </div>
+            <div class="role-card-body">
+                <h3>Masuk Sebagai Guru</h3>
+                <p class="role-desc">Buat kuis baru, kelola kelas, dan mulai permainan yang seru untuk seluruh siswamu.</p>
+                <button class="btn btn-outline" onclick="window.location.href='login-guru.html'">Masuk ke Dashboard</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2025 PlaywithME · Game Edukasi Susun Kata</p>
+</footer>
+
+</body>
+</html>

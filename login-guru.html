@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Login Guru</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        /* Variabel Warna Sesuai Palet */
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+        }
+
+        /* Reset CSS Dasar */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            /* Latar belakang diubah sedikit agar form lebih menonjol */
+            background-color: var(--secondary-color); 
+            color: var(--paragraph-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Bagian Header */
+        header {
+            padding: 20px 40px;
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header h1 {
+            color: var(--headline-color);
+            font-size: 28px;
+            text-decoration: none;
+        }
+
+        /* Kontainer Utama Form */
+        .container {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Kotak Login */
+        .login-box {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 8px 8px 0px var(--stroke-color); /* Efek tebal ala game */
+        }
+
+        .login-box h2 {
+            color: var(--headline-color);
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .login-box p {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Grup Input Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--headline-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.2s;
+        }
+
+        /* Animasi saat input sedang diisi (Fokus) */
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            box-shadow: 4px 4px 0px var(--tertiary-color);
+        }
+
+        /* Tombol Utama */
+        .btn {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 3px solid var(--stroke-color);
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            transition: all 0.1s;
+            margin-top: 10px;
+        }
+
+        .btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--stroke-color);
+        }
+
+        /* Tautan Kembali */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--headline-color);
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--button-bg);
+            text-decoration: underline;
+        }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 640px) {
+            header { padding: 14px 20px; }
+            header h1 { font-size: 20px; }
+            header lottie-player { width: 44px !important; height: 44px !important; }
+            .container { padding: 16px; }
+            .login-box { padding: 28px 22px; border-radius: 14px; box-shadow: 4px 4px 0 var(--stroke-color); }
+            .login-box h2 { font-size: 22px; }
+            .form-group input { padding: 12px 14px; font-size: 15px; }
+            .btn { font-size: 15px; padding: 12px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <lottie-player
+            src="PlaywithMe.json"
+            background="transparent"
+            speed="1"
+            style="width: 60px; height: 60px;"
+            loop
+            autoplay>
+        </lottie-player>
+        <h1>PlaywithME</h1>
+    </header>
+
+    <div class="container">
+        <div class="login-box">
+            <h2>Portal Guru</h2>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Alamat Email</label>
+                    <input type="email" id="email" placeholder="guru@sekolah.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Kata Sandi</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn">Masuk</button>
+            </form>
+
+            <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        // Import 'auth' dari file konfigurasi yang kita buat tadi
+        import { auth } from "./firebase-config.js";
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Mencegah halaman reload otomatis
+            
+            // Ubah teks tombol menjadi loading
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Memeriksa...";
+            submitBtn.disabled = true;
+
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            // Proses Login Firebase
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Jika Sukses Login
+                    const user = userCredential.user;
+                    console.log("Login Berhasil! UID:", user.uid);
+                    alert("Login berhasil! Mengalihkan ke Dashboard...");
+                    window.location.href = 'dashboard-guru.html';
+                })
+                .catch((error) => {
+                    // Jika Gagal Login
+                    const errorCode = error.code;
+                    console.error("Error Code:", errorCode);
+                    
+                    if (errorCode === 'auth/invalid-credential') {
+                        alert("Email atau kata sandi salah!");
+                    } else if (errorCode === 'auth/too-many-requests') {
+                        alert("Terlalu banyak percobaan. Coba lagi nanti.");
+                    } else {
+                        alert("Terjadi kesalahan: " + error.message);
+                    }
+                })
+                .finally(() => {
+                    // Kembalikan tombol seperti semula
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+    </script>
+
+</body>
+</html>

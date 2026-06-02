@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Game Berlangsung</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+            --danger-color: #ff8906;
+            --surface: rgba(255,255,255,0.06);
+            --surface-border: rgba(255,255,255,0.11);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--headline-color);
+            background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOPBAR ===== */
+        .topbar {
+            background: rgba(0,0,0,0.2);
+            border-bottom: 2px solid var(--surface-border);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .logo { font-size: 18px; font-weight: 900; color: var(--button-bg); letter-spacing: -0.5px; }
+
+        .soal-badge {
+            background: var(--surface);
+            border: 1.5px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.75);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .soal-badge span { color: var(--button-bg); }
+
+        #judulKuisTop { max-width: 240px; overflow: hidden; }
+        #judulKuisTop span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+
+        /* ===== VIEW TOGGLE (center) ===== */
+        .view-toggle {
+            display: flex;
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 3px;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+        .toggle-btn {
+            padding: 7px 18px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: rgba(255,255,255,0.45);
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .toggle-btn.active {
+            background: var(--button-bg);
+            color: var(--headline-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .siswa-count {
+            background: rgba(186,232,232,0.12);
+            color: var(--tertiary-color);
+            border: 1.5px solid rgba(186,232,232,0.25);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 13px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-end {
+            background: var(--danger-color);
+            color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+        .btn-end:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.3); }
+        .btn-end:active { transform: translate(3px,3px); box-shadow: none; }
+
+        /* ===== VIEW 1: SOAL & KUNCI ===== */
+        #viewSoal {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+        }
+
+        .panel-soal {
+            padding: 26px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-right: 2px solid var(--surface-border);
+        }
+
+        /* Progress dots */
+        .progress-track { display: flex; gap: 5px; align-items: center; }
+        .progress-dot {
+            flex: 1; height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.4s;
+        }
+        .progress-dot.done { background: var(--tertiary-color); }
+        .progress-dot.current { background: var(--button-bg); animation: pulse-dot 1.2s infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+        /* Soal Card */
+        .soal-card {
+            background: var(--surface);
+            border: 2px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .soal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--button-bg) 0%, var(--tertiary-color) 100%);
+            border-radius: 20px 20px 0 0;
+        }
+        .soal-card::after {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,216,3,0.07) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .soal-num-tag {
+            display: inline-flex; align-items: center;
+            background: var(--button-bg); color: var(--headline-color);
+            font-size: 11px; font-weight: 900;
+            padding: 4px 14px; border-radius: 20px;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        .soal-text { font-size: 24px; font-weight: 800; line-height: 1.5; color: var(--bg-color); }
+
+        /* Jawaban hint */
+        .jawaban-hint {
+            background: rgba(186,232,232,0.07);
+            border: 2px solid rgba(186,232,232,0.2);
+            border-radius: 16px; padding: 18px 22px;
+        }
+        .jawaban-hint-label {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11px; font-weight: 800;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--tertiary-color); margin-bottom: 14px;
+        }
+        .jawaban-kata { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .kata-chip {
+            background: rgba(186,232,232,0.12);
+            border: 2px solid rgba(186,232,232,0.28);
+            border-radius: 8px; padding: 6px 14px;
+            font-size: 15px; font-weight: 700; color: var(--bg-color);
+        }
+        .kata-chip.arrow { background: none; border: none; color: rgba(255,255,255,0.22); font-size: 18px; padding: 4px 2px; }
+
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .stat-box {
+            background: var(--surface); border: 2px solid var(--surface-border);
+            border-radius: 16px; padding: 18px; text-align: center;
+        }
+        .stat-number { font-size: 36px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+        .stat-number.selesai { color: var(--tertiary-color); }
+        .stat-number.bermain { color: var(--button-bg); }
+        .stat-number.rata    { color: rgba(255,255,255,0.4); }
+        .stat-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1.2px; }
+
+        /* Nav buttons */
+        .nav-row { display: flex; gap: 12px; }
+        .btn-nav {
+            flex: 1; padding: 14px; font-size: 16px; font-weight: 900;
+            border-radius: 14px; cursor: pointer;
+            border: 3px solid var(--stroke-color);
+            transition: all 0.1s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-nav:active { transform: translate(4px,4px); box-shadow: none !important; }
+        .btn-nav:disabled { opacity: 0.22; cursor: not-allowed; }
+        .btn-prev { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); box-shadow: 4px 4px 0 rgba(0,0,0,0.28); }
+        .btn-next { background: var(--button-bg); color: var(--headline-color); box-shadow: 4px 4px 0 rgba(0,0,0,0.35); }
+        .btn-next:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 rgba(0,0,0,0.35); }
+
+        /* Sidebar leaderboard */
+        .panel-leaderboard { display: flex; flex-direction: column; background: rgba(0,0,0,0.18); }
+        .lb-header {
+            padding: 16px 18px 12px;
+            border-bottom: 2px solid var(--surface-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .lb-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; color: var(--bg-color); }
+        .lb-subtitle { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+        .lb-live-dot {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 800; color: var(--tertiary-color);
+            background: rgba(186,232,232,0.08); border: 1px solid rgba(186,232,232,0.2);
+            border-radius: 20px; padding: 4px 10px;
+        }
+        .live-dot-circle { width: 7px; height: 7px; background: var(--tertiary-color); border-radius: 50%; animation: blink 1.2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+
+        .lb-list {
+            flex: 1; overflow-y: auto; padding: 10px;
+            display: flex; flex-direction: column; gap: 7px;
+        }
+        .lb-list::-webkit-scrollbar { width: 3px; }
+        .lb-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .lb-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 13px; border-radius: 12px;
+            background: var(--surface); border: 1.5px solid var(--surface-border);
+            transition: all 0.4s ease; animation: slideIn 0.35s ease-out;
+        }
+        @keyframes slideIn { from{opacity:0;transform:translateX(14px)} to{opacity:1;transform:translateX(0)} }
+
+        .lb-rank {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 900; flex-shrink: 0;
+        }
+        .rank-1 { background: var(--button-bg); color: var(--headline-color); font-size: 17px; }
+        .rank-2 { background: var(--tertiary-color); color: var(--headline-color); font-size: 17px; }
+        .rank-3 { background: var(--secondary-color); color: var(--headline-color); font-size: 15px; }
+        .rank-other { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); font-size: 12px; }
+
+        .lb-avatar { flex-shrink: 0; display: flex; align-items: center; }
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .score-bar-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .score-bar-fill { height: 100%; background: var(--button-bg); border-radius: 2px; transition: width 0.6s ease; }
+
+        .lb-status { display: flex; align-items: center; gap: 4px; font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+        .lb-status.selesai { color: var(--tertiary-color); }
+        .lb-status.main    { color: rgba(255,216,3,0.55); }
+
+        .lb-score { font-size: 16px; font-weight: 900; color: var(--button-bg); flex-shrink: 0; }
+
+        .lb-empty {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 12px; padding: 40px 20px; text-align: center;
+        }
+        .lb-empty p { color: rgba(255,255,255,0.28); font-size: 14px; line-height: 1.6; }
+
+        /* ===== VIEW 2: FULLSCREEN LEADERBOARD ===== */
+        #viewLeaderboard {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .lb-full-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 48px;
+            border-bottom: 2px solid var(--surface-border);
+            background: rgba(0,0,0,0.2);
+        }
+        .lb-full-title {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 26px; font-weight: 900; color: var(--bg-color);
+        }
+        .lb-full-live {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 900; color: var(--tertiary-color);
+            background: rgba(186,232,232,0.1); border: 1.5px solid rgba(186,232,232,0.25);
+            border-radius: 20px; padding: 6px 16px;
+        }
+        .lb-full-live .live-dot-circle { width: 8px; height: 8px; }
+
+        .lb-full-body {
+            flex: 1;
+            max-width: 820px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* Live podium (top 3) */
+        .live-podium-label {
+            font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3); margin-bottom: 20px; text-align: center;
+        }
+        .live-podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 16px;
+        }
+        .live-podium-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .live-podium-medal { font-size: 40px; line-height: 1; }
+        .live-podium-avatar { display: flex; align-items: center; justify-content: center; }
+        .live-podium-name { font-size: 15px; font-weight: 900; text-align: center; max-width: 130px; word-break: break-word; color: var(--bg-color); }
+        .live-podium-score { font-size: 13px; color: rgba(255,255,255,0.45); font-weight: 800; }
+        .live-podium-block {
+            width: 110px; border-radius: 14px 14px 0 0;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+        .live-pb-1 { background: var(--button-bg); height: 100px; }
+        .live-pb-2 { background: var(--tertiary-color); height: 72px; }
+        .live-pb-3 { background: var(--secondary-color); height: 54px; }
+
+        /* Separator */
+        .lb-full-sep {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .lb-full-sep span { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.25); white-space: nowrap; }
+        .lb-full-sep::before, .lb-full-sep::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+
+        /* Full ranked list */
+        .lb-full-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .lb-full-item {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 22px; border-radius: 16px;
+            background: var(--surface); border: 1.5px solid var(--surface-border);
+            transition: all 0.4s ease; animation: slideUp 0.3s ease-out;
+        }
+        .lb-full-item.top-item { border-color: rgba(255,216,3,0.2); background: rgba(255,216,3,0.06); }
+        @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+        .lb-full-rank {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 900; flex-shrink: 0;
+        }
+        .lb-full-rank.rank-1 { background: var(--button-bg); color: var(--headline-color); font-size: 24px; }
+        .lb-full-rank.rank-2 { background: var(--tertiary-color); color: var(--headline-color); font-size: 24px; }
+        .lb-full-rank.rank-3 { background: var(--secondary-color); color: var(--headline-color); font-size: 22px; }
+        .lb-full-rank.rank-other { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); font-size: 16px; }
+
+        .lb-full-avatar { flex-shrink: 0; display: flex; align-items: center; }
+
+        .lb-full-info { flex: 1; min-width: 0; }
+        .lb-full-name { font-size: 18px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .lb-full-bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .lb-full-bar-fill { height: 100%; background: var(--button-bg); border-radius: 2px; transition: width 0.6s ease; }
+
+        .lb-full-status { display: flex; align-items: center; gap: 5px; font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 5px; }
+        .lb-full-status.selesai { color: var(--tertiary-color); }
+        .lb-full-status.main    { color: rgba(255,216,3,0.6); }
+
+        .lb-full-score { font-size: 26px; font-weight: 900; color: var(--button-bg); flex-shrink: 0; min-width: 60px; text-align: right; }
+
+        .lb-full-empty {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 16px; padding: 60px 20px; text-align: center;
+        }
+        .lb-full-empty p { color: rgba(255,255,255,0.3); font-size: 16px; line-height: 1.6; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(20,18,45,0.85); backdrop-filter: blur(6px);
+            z-index: 800; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--paragraph-color);
+            border: 3px solid var(--stroke-color); border-radius: 22px;
+            padding: 38px 36px; max-width: 380px; width: 90%;
+            text-align: center; box-shadow: 10px 10px 0 var(--stroke-color);
+            animation: popIn 0.25s ease-out;
+        }
+        @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+        .modal-box h3 { font-size: 22px; font-weight: 900; margin-bottom: 10px; color: var(--bg-color); }
+        .modal-box p { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 26px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-actions button {
+            padding: 12px 26px; font-size: 15px; font-weight: 800;
+            border-radius: 10px; cursor: pointer;
+            border: 3px solid var(--stroke-color); box-shadow: 3px 3px 0 var(--stroke-color); transition: all 0.1s;
+        }
+        .modal-actions button:active { transform: translate(3px,3px); box-shadow: none; }
+        .modal-actions .confirm { background: var(--danger-color); color: var(--bg-color); }
+        .modal-actions .cancel  { background: rgba(255,255,255,0.1); color: var(--bg-color); }
+
+        /* ===== FINISH OVERLAY ===== */
+        .finish-overlay {
+            display: none; position: fixed; inset: 0;
+            background: var(--headline-color);
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(255,216,3,0.06) 0%, transparent 55%);
+            z-index: 900; flex-direction: column; align-items: center;
+            overflow-y: auto; padding: 40px 20px;
+        }
+        .finish-overlay.show { display: flex; }
+
+        .finish-top { text-align: center; margin-bottom: 36px; display: flex; flex-direction: column; align-items: center; }
+        .finish-top h1 { font-size: 44px; font-weight: 900; color: var(--button-bg); margin-top: 6px; margin-bottom: 8px; }
+        .finish-top p { font-size: 16px; color: rgba(255,255,255,0.45); }
+
+        .podium { display: flex; align-items: flex-end; justify-content: center; gap: 16px; margin-bottom: 44px; }
+        .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .podium-medal { font-size: 32px; line-height: 1; }
+        .podium-avatar { display: flex; align-items: center; justify-content: center; }
+        .podium-name { font-size: 13px; font-weight: 800; text-align: center; max-width: 100px; word-break: break-word; color: var(--bg-color); }
+        .podium-score { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 700; }
+        .podium-block { width: 90px; border-radius: 12px 12px 0 0; border: 3px solid var(--stroke-color); }
+        .podium-1 { background: var(--button-bg); height: 120px; }
+        .podium-2 { background: var(--tertiary-color); height: 88px; }
+        .podium-3 { background: var(--secondary-color); height: 66px; }
+
+        .result-table-wrap {
+            width: 100%; max-width: 620px;
+            background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.09);
+            border-radius: 18px; overflow: hidden; margin-bottom: 32px;
+        }
+        .result-table { width: 100%; border-collapse: collapse; }
+        .result-table th {
+            background: rgba(255,255,255,0.07); padding: 12px 20px;
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.2px; color: rgba(255,255,255,0.3); text-align: left;
+        }
+        .result-table td { padding: 13px 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 15px; color: var(--bg-color); }
+        .result-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .finish-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+        .btn-finish {
+            padding: 14px 28px; font-size: 15px; font-weight: 900;
+            border-radius: 14px; cursor: pointer;
+            border: 3px solid var(--stroke-color); box-shadow: 5px 5px 0 var(--stroke-color); transition: all 0.1s;
+        }
+        .btn-finish:active { transform: translate(5px,5px); box-shadow: none; }
+        .btn-finish.primary { background: var(--button-bg); color: var(--headline-color); }
+        .btn-finish.secondary { background: rgba(255,255,255,0.07); color: var(--bg-color); }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 900px) {
+            #viewSoal { grid-template-columns: 1fr; }
+            .panel-soal { border-right: none; border-bottom: 2px solid var(--surface-border); }
+            .panel-leaderboard { border-top: 2px solid var(--surface-border); max-height: 340px; }
+        }
+
+        @media (max-width: 640px) {
+            .topbar { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
+            .topbar-left { gap: 6px; flex-wrap: wrap; }
+            .logo { font-size: 14px; }
+            .soal-badge { font-size: 11px; padding: 4px 9px; gap: 4px; }
+            #judulKuisTop { display: none; }
+            .view-toggle { width: 100%; order: 3; }
+            .toggle-btn { flex: 1; justify-content: center; padding: 7px 8px; font-size: 11px; }
+            .topbar-right { gap: 6px; }
+            .siswa-count { font-size: 11px; padding: 4px 9px; }
+            .btn-end { font-size: 12px; padding: 6px 10px; box-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+
+            .panel-soal { padding: 16px 14px; gap: 14px; }
+            .soal-card { padding: 16px; border-radius: 14px; }
+            .soal-text { font-size: 17px; line-height: 1.45; }
+            .stats-row { gap: 8px; }
+            .stat-box { padding: 14px 12px; border-radius: 12px; }
+            .stat-number { font-size: 26px; }
+            .stat-label { font-size: 9px; }
+            .nav-row { gap: 8px; }
+            .btn-nav { font-size: 14px; padding: 11px 10px; border-radius: 12px; box-shadow: 3px 3px 0 rgba(0,0,0,0.28); }
+            .jawaban-hint { padding: 14px 16px; border-radius: 12px; }
+            .kata-chip { font-size: 14px; padding: 5px 12px; }
+
+            .lb-full-topbar { padding: 12px 14px; }
+            .lb-full-title { font-size: 18px; gap: 8px; }
+            .lb-full-live { font-size: 11px; padding: 4px 10px; }
+            .lb-full-body { padding: 16px 12px; gap: 16px; }
+            .lb-full-item { padding: 12px 14px; gap: 10px; border-radius: 12px; }
+            .lb-full-name { font-size: 14px; }
+            .lb-full-score { font-size: 20px; min-width: 48px; }
+            .lb-full-rank { width: 36px; height: 36px; }
+            .lb-full-rank.rank-1, .lb-full-rank.rank-2 { font-size: 18px; }
+            .live-podium { gap: 10px; }
+            .live-podium-block { width: 72px; }
+            .live-pb-1 { height: 72px; }
+            .live-pb-2 { height: 50px; }
+            .live-pb-3 { height: 36px; }
+            .live-podium-name { font-size: 12px; max-width: 80px; }
+            .live-podium-medal { font-size: 28px; }
+
+            .finish-overlay { padding: 20px 14px; }
+            .finish-top h1 { font-size: 30px; }
+            .finish-top p { font-size: 14px; margin-bottom: 24px; }
+            .podium { gap: 8px; margin-bottom: 24px; }
+            .podium-block { width: 70px; }
+            .podium-1 { height: 88px; }
+            .podium-2 { height: 64px; }
+            .podium-3 { height: 48px; }
+            .podium-name { font-size: 11px; max-width: 72px; }
+            .result-table th, .result-table td { padding: 10px 12px; font-size: 13px; }
+            .result-table th { font-size: 9px; letter-spacing: 0.8px; }
+            .modal-box { padding: 24px 18px; border-radius: 18px; }
+            .modal-box h3 { font-size: 19px; }
+            .modal-actions button { padding: 10px 18px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="logo">PlaywithMe</div>
+        <div class="soal-badge">
+            Soal <span id="soalNumTop">1</span> / <span id="soalTotalTop">?</span>
+        </div>
+        <div class="soal-badge" id="judulKuisTop">
+            <lottie-player src="quiz-list.json" background="transparent" speed="1"
+                style="width: 20px; height: 20px; flex-shrink:0;" loop autoplay>
+            </lottie-player>
+            <span>Memuat...</span>
+        </div>
+    </div>
+
+    <!-- TAB TOGGLE (tengah) -->
+    <div class="view-toggle">
+        <button class="toggle-btn active" id="btnViewSoal" onclick="switchView('soal')">
+            📋 Soal &amp; Kunci
+        </button>
+        <button class="toggle-btn" id="btnViewLB" onclick="switchView('leaderboard')">
+            <lottie-player src="leaderboard.json" background="transparent" speed="1"
+                style="width: 18px; height: 18px;" loop autoplay>
+            </lottie-player>
+            Leaderboard Siswa
+        </button>
+    </div>
+
+    <div class="topbar-right">
+        <div class="siswa-count">
+            <lottie-player src="student.json" background="transparent" speed="1"
+                style="width: 22px; height: 22px;" loop autoplay>
+            </lottie-player>
+            <span id="siswaCountTop">0</span> siswa
+        </div>
+        <button class="btn-end" onclick="konfirmasiAkhiri()">Akhiri Game</button>
+    </div>
+</div>
+
+<!-- ===================== VIEW 1: SOAL & KUNCI (PRIVAT) ===================== -->
+<div id="viewSoal">
+
+    <!-- PANEL KIRI: SOAL -->
+    <div class="panel-soal">
+        <div class="progress-track" id="progressTrack"></div>
+
+        <div class="soal-card">
+            <div class="soal-num-tag" id="soalNumTag">Soal 1</div>
+            <div class="soal-text" id="soalText">Memuat soal...</div>
+        </div>
+
+        <div class="jawaban-hint">
+            <div class="jawaban-hint-label">
+                <lottie-player src="check-list.json" background="transparent" speed="1"
+                    style="width: 20px; height: 20px; flex-shrink:0;" loop autoplay>
+                </lottie-player>
+                Susunan Jawaban Benar
+            </div>
+            <div class="jawaban-kata" id="jawabanKata">
+                <span class="kata-chip" style="opacity:0.4;">—</span>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-number selesai" id="statSelesai">0</div>
+                <div class="stat-label">Selesai</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number bermain" id="statBermain">0</div>
+                <div class="stat-label">Bermain</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number rata" id="statSkorRata">0</div>
+                <div class="stat-label">Rata Skor</div>
+            </div>
+        </div>
+
+        <div class="nav-row">
+            <button class="btn-nav btn-prev" id="btnPrev" onclick="navigasiSoal(-1)" disabled>← Sebelumnya</button>
+            <button class="btn-nav btn-next" id="btnNext" onclick="navigasiSoal(1)">Berikutnya →</button>
+        </div>
+    </div>
+
+    <!-- PANEL KANAN: LEADERBOARD SIDEBAR -->
+    <div class="panel-leaderboard">
+        <div class="lb-header">
+            <div>
+                <div class="lb-title">
+                    <lottie-player src="leaderboard.json" background="transparent" speed="1"
+                        style="width: 26px; height: 26px;" loop autoplay>
+                    </lottie-player>
+                    Leaderboard
+                </div>
+                <div class="lb-subtitle">Update otomatis</div>
+            </div>
+            <div class="lb-live-dot">
+                <div class="live-dot-circle"></div>
+                LIVE
+            </div>
+        </div>
+        <div class="lb-list" id="leaderboardList">
+            <div class="lb-empty">
+                <lottie-player src="hourglass.json" background="transparent" speed="1"
+                    style="width: 70px; height: 70px;" loop autoplay>
+                </lottie-player>
+                <p>Menunggu siswa menyelesaikan soal...</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===================== VIEW 2: LEADERBOARD SISWA (UNTUK PROYEKTOR) ===================== -->
+<div id="viewLeaderboard" style="flex:1; flex-direction:column; overflow-y:auto;">
+
+    <div class="lb-full-topbar">
+        <div class="lb-full-title">
+            <lottie-player src="leaderboard.json" background="transparent" speed="1"
+                style="width: 40px; height: 40px;" loop autoplay>
+            </lottie-player>
+            Leaderboard Siswa
+        </div>
+        <div class="lb-full-live">
+            <div class="live-dot-circle"></div>
+            UPDATE REALTIME
+        </div>
+    </div>
+
+    <div class="lb-full-body">
+
+        <!-- Live Podium Top 3 -->
+        <div class="live-podium-section">
+            <div class="live-podium-label">Peringkat Teratas</div>
+            <div class="live-podium" id="livePodium">
+                <div class="lb-full-empty">
+                    <lottie-player src="wait-student.json" background="transparent" speed="1"
+                        style="width: 100px; height: 100px;" loop autoplay>
+                    </lottie-player>
+                    <p>Menunggu siswa menyelesaikan soal...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separator -->
+        <div class="lb-full-sep">
+            <span>Semua Peringkat</span>
+        </div>
+
+        <!-- Full Ranked List -->
+        <div class="lb-full-list" id="lbFullList">
+            <div class="lb-full-empty">
+                <lottie-player src="hourglass.json" background="transparent" speed="1"
+                    style="width: 90px; height: 90px;" loop autoplay>
+                </lottie-player>
+                <p>Belum ada siswa yang bergabung...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Akhiri -->
+<div class="modal-overlay" id="endModal">
+    <div class="modal-box">
+        <lottie-player src="finish.json" background="transparent" speed="1"
+            style="width: 90px; height: 90px; margin: 0 auto 16px;" loop autoplay>
+        </lottie-player>
+        <h3>Akhiri Game?</h3>
+        <p>Semua skor saat ini akan disimpan. Siswa yang belum selesai akan dihentikan permainannya.</p>
+        <div class="modal-actions">
+            <button class="cancel" onclick="closeModal()">Batal</button>
+            <button class="confirm" onclick="akhiriGame()">Ya, Akhiri!</button>
+        </div>
+    </div>
+</div>
+
+<!-- Layar Hasil Akhir -->
+<div class="finish-overlay" id="finishOverlay">
+    <div class="finish-top">
+        <lottie-player src="confetti.json" background="transparent" speed="1"
+            style="width: 130px; height: 130px;" loop autoplay>
+        </lottie-player>
+        <h1>Game Selesai!</h1>
+        <p id="finishSubtitle">Hasil akhir kuis</p>
+    </div>
+
+    <div class="podium" id="podium"></div>
+
+    <div class="result-table-wrap">
+        <table class="result-table">
+            <thead>
+                <tr><th>#</th><th>Nama</th><th>Skor</th><th>Status</th></tr>
+            </thead>
+            <tbody id="resultTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="finish-actions">
+        <button class="btn-finish secondary" onclick="window.location.href='dashboard-guru.html'">← Kembali ke Dashboard</button>
+        <button class="btn-finish primary" onclick="window.print()">🖨 Cetak Hasil</button>
+    </div>
+</div>
+
+<script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { doc, getDoc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const params  = new URLSearchParams(window.location.search);
+    const pin     = params.get('pin');
+    let soalList  = [];
+    let soalIndex = 0;
+    let siswaList = [];
+    let hasilList = [];
+    let skorLive  = {};  // { nama: skor } — diperbarui realtime saat siswa jawab benar
+    let unsubSesi = null;
+    let maxSkor   = 0;
+
+    if (!pin) { alert('PIN tidak ditemukan.'); window.location.href = 'dashboard-guru.html'; }
+
+    // ===== SWITCH VIEW =====
+    window.switchView = function(view) {
+        const elSoal = document.getElementById('viewSoal');
+        const elLB   = document.getElementById('viewLeaderboard');
+        const btnS   = document.getElementById('btnViewSoal');
+        const btnL   = document.getElementById('btnViewLB');
+
+        if (view === 'soal') {
+            elSoal.style.display = 'grid';
+            elLB.style.display   = 'none';
+            btnS.classList.add('active');
+            btnL.classList.remove('active');
+        } else {
+            elSoal.style.display = 'none';
+            elLB.style.display   = 'flex';
+            btnS.classList.remove('active');
+            btnL.classList.add('active');
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) { window.location.href = 'login-guru.html'; }
+        else { init(); }
+    });
+
+    async function init() {
+        try {
+            const sesiRef  = doc(db, "sesi", pin);
+            const sesiSnap = await getDoc(sesiRef);
+            if (!sesiSnap.exists()) { alert('Sesi tidak ditemukan.'); window.location.href = 'dashboard-guru.html'; return; }
+            const sesiData = sesiSnap.data();
+
+            document.getElementById('judulKuisTop').innerHTML =
+                `<lottie-player src="quiz-list.json" background="transparent" speed="1" style="width:20px;height:20px;flex-shrink:0;" loop autoplay></lottie-player><span>${sesiData.judul_kuis}</span>`;
+
+            const kuisSnap = await getDoc(doc(db, "kuis", sesiData.kuis_id));
+            if (!kuisSnap.exists()) { alert('Data kuis tidak ditemukan.'); return; }
+
+            soalList = kuisSnap.data().soal;
+            maxSkor  = soalList.length * 100;
+
+            setupProgressDots();
+            document.getElementById('soalTotalTop').textContent = soalList.length;
+            tampilkanSoal(0);
+
+            if (sesiData.status !== 'berlangsung' && sesiData.status !== 'selesai') {
+                await updateDoc(sesiRef, { status: 'berlangsung' });
+            }
+
+            startSesiListener();
+        } catch (err) {
+            console.error('❌ [Game Guru] Init error:', err);
+            alert('Gagal memuat game: ' + err.message);
+        }
+    }
+
+    function setupProgressDots() {
+        const track = document.getElementById('progressTrack');
+        track.innerHTML = '';
+        soalList.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'progress-dot' + (i === 0 ? ' current' : '');
+            dot.id = `dot-${i}`;
+            track.appendChild(dot);
+        });
+    }
+
+    function updateProgressDots(idx) {
+        soalList.forEach((_, i) => {
+            const dot = document.getElementById(`dot-${i}`);
+            if (!dot) return;
+            dot.className = 'progress-dot' + (i < idx ? ' done' : i === idx ? ' current' : '');
+        });
+    }
+
+    function tampilkanSoal(idx) {
+        if (idx < 0 || idx >= soalList.length) return;
+        soalIndex = idx;
+        const soal = soalList[idx];
+
+        document.getElementById('soalNumTop').textContent = idx + 1;
+        document.getElementById('soalNumTag').textContent = `Soal ${idx + 1}`;
+        document.getElementById('soalText').textContent = soal.pertanyaan;
+
+        const kata = soal.kata_jawaban || soal.jawaban.split(' ').filter(k => k);
+        document.getElementById('jawabanKata').innerHTML = kata.map((k, i) =>
+            `${i > 0 ? '<span class="kata-chip arrow">›</span>' : ''}<span class="kata-chip">${k}</span>`
+        ).join('');
+
+        document.getElementById('btnPrev').disabled = idx === 0;
+        const btnNext = document.getElementById('btnNext');
+        if (idx === soalList.length - 1) {
+            btnNext.innerHTML = `<lottie-player src="finish.json" background="transparent" speed="1" style="width:22px;height:22px;" loop autoplay></lottie-player> Ini Soal Terakhir`;
+            btnNext.disabled = true;
+        } else {
+            btnNext.textContent = 'Berikutnya →';
+            btnNext.disabled = false;
+        }
+
+        updateProgressDots(idx);
+    }
+
+    window.navigasiSoal = function(delta) { tampilkanSoal(soalIndex + delta); };
+
+    function startSesiListener() {
+        unsubSesi = onSnapshot(doc(db, "sesi", pin), (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data();
+
+            siswaList = data.siswa     || [];
+            hasilList = data.hasil     || [];
+            skorLive  = data.skor_live || {};
+
+            document.getElementById('siswaCountTop').textContent = siswaList.length;
+            updateStats();
+            updateLeaderboard();
+
+            if (data.status === 'selesai') { unsubSesi(); tampilkanHasilAkhir(data.hasil_final || []); }
+        });
+    }
+
+    function updateStats() {
+        const selesai = hasilList.length;
+        const bermain = Math.max(0, siswaList.length - selesai);
+        const total   = hasilList.reduce((s, h) => s + (h.skor || 0), 0);
+        const rata    = selesai > 0 ? Math.round(total / selesai) : 0;
+        document.getElementById('statSelesai').textContent  = selesai;
+        document.getElementById('statBermain').textContent  = bermain;
+        document.getElementById('statSkorRata').textContent = rata;
+    }
+
+    // ===== LEADERBOARD: update sidebar + fullscreen =====
+    function updateLeaderboard() {
+        const hasilMap = {};
+        hasilList.forEach(h => { hasilMap[h.nama] = h; });
+
+        const semua = siswaList.map(s => ({
+            nama: s.nama, avatar: s.avatar,
+            // Prioritas: skor final (selesai) → skor live (masih bermain) → null
+            skor: hasilMap[s.nama]?.skor ?? (skorLive[s.nama] ?? null),
+            selesai: !!hasilMap[s.nama]
+        }));
+
+        // Urutkan berdasarkan skor tertinggi (live maupun final)
+        // Skor live dari siswa yang masih bermain ikut bersaing di realtime
+        semua.sort((a, b) => (b.skor ?? -1) - (a.skor ?? -1));
+
+        renderSidebar(semua);
+        renderFullLeaderboard(semua);
+    }
+
+    function renderSidebar(semua) {
+        const listEl = document.getElementById('leaderboardList');
+
+        if (semua.length === 0) {
+            listEl.innerHTML = `
+                <div class="lb-empty">
+                    <lottie-player src="hourglass.json" background="transparent" speed="1"
+                        style="width: 70px; height: 70px;" loop autoplay></lottie-player>
+                    <p>Menunggu siswa menyelesaikan soal...</p>
+                </div>`;
+            return;
+        }
+
+        listEl.innerHTML = '';
+        semua.forEach((s, i) => {
+            const rank      = i + 1;
+            const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+            const rankLabel = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            const persen    = maxSkor > 0 && s.skor !== null ? Math.min(100, Math.round((s.skor / maxSkor) * 100)) : 0;
+
+            const statusHtml = s.selesai
+                ? `<lottie-player src="check-box.json" background="transparent" speed="1" style="width:14px;height:14px;flex-shrink:0;" loop autoplay></lottie-player> Selesai`
+                : `<lottie-player src="hourglass.json" background="transparent" speed="1" style="width:14px;height:14px;flex-shrink:0;" loop autoplay></lottie-player> Sedang bermain...`;
+
+            const item = document.createElement('div');
+            item.className = 'lb-item';
+            item.innerHTML = `
+                <div class="lb-rank ${rankClass}">${rankLabel}</div>
+                <div class="lb-avatar"><lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:28px;height:28px;" loop autoplay></lottie-player></div>
+                <div class="lb-info">
+                    <div class="lb-name">${s.nama}</div>
+                    <div class="score-bar-track"><div class="score-bar-fill" style="width:${persen}%"></div></div>
+                    <div class="lb-status ${s.selesai ? 'selesai' : 'main'}">${statusHtml}</div>
+                </div>
+                <div class="lb-score">${s.skor !== null ? s.skor : '—'}</div>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+
+    function renderFullLeaderboard(semua) {
+        renderLivePodium(semua);
+        renderFullList(semua);
+    }
+
+    function renderLivePodium(semua) {
+        const podiumEl = document.getElementById('livePodium');
+        // Tampilkan top 3 siapa pun yang sudah punya skor (selesai maupun masih bermain)
+        const top = semua.filter(s => s.skor !== null).slice(0, 3);
+
+        if (top.length === 0) {
+            podiumEl.innerHTML = `
+                <div class="lb-full-empty">
+                    <lottie-player src="wait-student.json" background="transparent" speed="1"
+                        style="width: 100px; height: 100px;" loop autoplay></lottie-player>
+                    <p>Menunggu siswa menyelesaikan soal...</p>
+                </div>`;
+            return;
+        }
+
+        // Urutan tampil: 2nd (kiri), 1st (tengah), 3rd (kanan)
+        podiumEl.innerHTML = '';
+        [1, 0, 2].forEach(pos => {
+            const s = top[pos];
+            if (!s) return;
+            const medal      = pos === 0 ? '🥇' : pos === 1 ? '🥈' : '🥉';
+            const blockClass = pos === 0 ? 'live-pb-1' : pos === 1 ? 'live-pb-2' : 'live-pb-3';
+            const slot = document.createElement('div');
+            slot.className = 'live-podium-slot';
+            slot.innerHTML = `
+                <div class="live-podium-medal">${medal}</div>
+                <div class="live-podium-avatar"><lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:56px;height:56px;" loop autoplay></lottie-player></div>
+                <div class="live-podium-name">${s.nama}</div>
+                <div class="live-podium-score">${s.skor} pts</div>
+                <div class="live-podium-block ${blockClass}"></div>
+            `;
+            podiumEl.appendChild(slot);
+        });
+    }
+
+    function renderFullList(semua) {
+        const listEl = document.getElementById('lbFullList');
+
+        if (semua.length === 0) {
+            listEl.innerHTML = `
+                <div class="lb-full-empty">
+                    <lottie-player src="hourglass.json" background="transparent" speed="1"
+                        style="width: 90px; height: 90px;" loop autoplay></lottie-player>
+                    <p>Belum ada siswa yang bergabung...</p>
+                </div>`;
+            return;
+        }
+
+        listEl.innerHTML = '';
+        semua.forEach((s, i) => {
+            const rank      = i + 1;
+            const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+            const rankLabel = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            const persen    = maxSkor > 0 && s.skor !== null ? Math.min(100, Math.round((s.skor / maxSkor) * 100)) : 0;
+
+            const statusHtml = s.selesai
+                ? `<lottie-player src="check-box.json" background="transparent" speed="1" style="width:16px;height:16px;flex-shrink:0;" loop autoplay></lottie-player> Selesai`
+                : `<lottie-player src="hourglass.json" background="transparent" speed="1" style="width:16px;height:16px;flex-shrink:0;" loop autoplay></lottie-player> Sedang bermain...`;
+
+            const item = document.createElement('div');
+            item.className = `lb-full-item ${rank <= 3 ? 'top-item' : ''}`;
+            item.innerHTML = `
+                <div class="lb-full-rank ${rankClass}">${rankLabel}</div>
+                <div class="lb-full-avatar"><lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:38px;height:38px;" loop autoplay></lottie-player></div>
+                <div class="lb-full-info">
+                    <div class="lb-full-name">${s.nama}</div>
+                    <div class="lb-full-bar-track"><div class="lb-full-bar-fill" style="width:${persen}%"></div></div>
+                    <div class="lb-full-status ${s.selesai ? 'selesai' : 'main'}">${statusHtml}</div>
+                </div>
+                <div class="lb-full-score">${s.skor !== null ? s.skor : '—'}</div>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+
+    window.konfirmasiAkhiri = function() { document.getElementById('endModal').classList.add('active'); };
+    window.closeModal       = function() { document.getElementById('endModal').classList.remove('active'); };
+
+    window.akhiriGame = async function() {
+        closeModal();
+        try {
+            const sesiRef = doc(db, "sesi", pin);
+
+            // Kompilasi skor final SEMUA siswa:
+            // - Yang sudah selesai → ambil dari hasilList
+            // - Yang belum selesai → ambil dari skorLive (atau 0 jika belum dapat poin)
+            const hasilMap = {};
+            hasilList.forEach(h => { hasilMap[h.nama] = h; });
+
+            const hasilFinal = siswaList.map(s => ({
+                nama   : s.nama,
+                avatar : s.avatar,
+                skor   : hasilMap[s.nama]?.skor ?? (skorLive[s.nama] ?? 0),
+                selesai: !!hasilMap[s.nama]
+            })).sort((a, b) => (b.skor || 0) - (a.skor || 0));
+
+            // Simpan hasil_final + ubah status selesai dalam satu operasi
+            await updateDoc(sesiRef, { hasil_final: hasilFinal, status: 'selesai' });
+        } catch (err) {
+            alert('Gagal mengakhiri game: ' + err.message);
+        }
+    };
+
+    // hasilFinal: array sudah diurutkan oleh akhiriGame(), berisi semua siswa
+    function tampilkanHasilAkhir(hasilFinal) {
+        const selesaiCount = hasilFinal.filter(h => h.selesai).length;
+        document.getElementById('finishSubtitle').textContent =
+            `${selesaiCount} dari ${hasilFinal.length} siswa menyelesaikan semua soal`;
+
+        // Podium — urutan tampil: 2nd kiri, 1st tengah, 3rd kanan
+        const podiumEl = document.getElementById('podium');
+        podiumEl.innerHTML = '';
+        [1, 0, 2].forEach(pos => {
+            const siswa = hasilFinal[pos];
+            if (!siswa) return;
+            const blockClass = pos === 0 ? 'podium-1' : pos === 1 ? 'podium-2' : 'podium-3';
+            const medal      = pos === 0 ? '🥇' : pos === 1 ? '🥈' : '🥉';
+            const slot = document.createElement('div');
+            slot.className = 'podium-slot';
+            slot.innerHTML = `
+                <div class="podium-medal">${medal}</div>
+                <div class="podium-avatar"><lottie-player src="${siswa.avatar}" background="transparent" speed="1" style="width:52px;height:52px;" loop autoplay></lottie-player></div>
+                <div class="podium-name">${siswa.nama}</div>
+                <div class="podium-score">${siswa.skor} pts</div>
+                <div class="podium-block ${blockClass}"></div>
+            `;
+            podiumEl.appendChild(slot);
+        });
+
+        // Tabel — hasilFinal sudah mencakup semua siswa (selesai & belum)
+        const tbody      = document.getElementById('resultTableBody');
+        const semuaHasil = hasilFinal; // sudah diurutkan
+
+        tbody.innerHTML = '';
+        semuaHasil.forEach((h, i) => {
+            const medal   = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+            const selesai = h.selesai;
+            const statusHtml = selesai
+                ? `<span style="display:inline-flex;align-items:center;gap:4px;color:var(--tertiary-color);font-size:12px;font-weight:700;"><lottie-player src="check-box.json" background="transparent" speed="1" style="width:15px;height:15px;" loop autoplay></lottie-player> Selesai</span>`
+                : `<span style="opacity:0.35;font-size:12px;font-weight:700;">⏭ Tidak selesai</span>`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:900;font-size:20px;">${medal}</td>
+                <td style="display:flex;align-items:center;gap:8px;"><lottie-player src="${h.avatar}" background="transparent" speed="1" style="width:28px;height:28px;flex-shrink:0;" loop autoplay></lottie-player>${h.nama}</td>
+                <td style="font-weight:900;color:var(--button-bg);font-size:18px;">${h.skor ?? 0}</td>
+                <td>${statusHtml}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('finishOverlay').classList.add('show');
+
+        setTimeout(async () => {
+            try { await deleteDoc(doc(db, "sesi", pin)); } catch(e) {}
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>

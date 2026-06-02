@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Buat Kuis Baru</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+            --danger-color: #ff8906;
+            --success-color: #3da9fc;
+            --page-bg: #edf7f7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--page-bg);
+            background-image: radial-gradient(circle, #c4e8e8 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--paragraph-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            padding: 10px 40px;
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 0 var(--stroke-color);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-brand h1 {
+            color: var(--headline-color);
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            border: 3px solid var(--stroke-color);
+            padding: 9px 18px;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            transition: all 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            line-height: 1;
+        }
+        .btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0px var(--stroke-color); }
+        .btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--stroke-color); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: 4px 4px 0px var(--stroke-color) !important; }
+        .btn-primary { background-color: var(--button-bg); color: var(--button-text); }
+        .btn-secondary { background-color: var(--bg-color); color: var(--headline-color); }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-bank { position: relative; background-color: #f0fafa; color: var(--headline-color); }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            padding: 36px 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ===== PROGRESS STEPS ===== */
+        .progress-steps {
+            display: flex;
+            align-items: stretch;
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+
+        .step {
+            flex: 1;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 2px solid var(--stroke-color);
+        }
+        .step:last-child { border-right: none; }
+        .step.active { background-color: var(--button-bg); }
+        .step.pending { background-color: var(--bg-color); opacity: 0.55; }
+
+        .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--stroke-color);
+            color: white;
+            font-weight: 900;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step.active .step-num { background: var(--headline-color); }
+
+        .step-label {
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--headline-color);
+        }
+
+        /* ===== SECTION CARD ===== */
+        .section-card {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 6px 6px 0px var(--stroke-color);
+        }
+
+        .section-card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--tertiary-color) 100%);
+            padding: 18px 28px;
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .section-card-header h2 {
+            font-size: 19px;
+            font-weight: 900;
+            color: var(--headline-color);
+            letter-spacing: -0.3px;
+        }
+
+        .section-card-header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-card-body {
+            padding: 28px;
+        }
+
+        /* ===== COUNT BADGE ===== */
+        .count-badge {
+            background: var(--button-bg);
+            border: 2px solid var(--stroke-color);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-weight: 900;
+            font-size: 15px;
+            color: var(--headline-color);
+            box-shadow: 2px 2px 0 var(--stroke-color);
+        }
+
+        /* ===== FORM ===== */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label {
+            font-weight: 800;
+            color: var(--headline-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background-color: #fffdf0;
+            box-shadow: 3px 3px 0px var(--stroke-color);
+        }
+
+        /* ===== QUESTION CARDS ===== */
+        .question-list { display: flex; flex-direction: column; gap: 16px; }
+
+        .question-card {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 5px 5px 0px var(--stroke-color);
+            animation: slideIn 0.3s ease-out;
+            transition: box-shadow 0.15s, transform 0.15s;
+        }
+        .question-card:hover {
+            box-shadow: 7px 7px 0px var(--stroke-color);
+            transform: translate(-1px, -1px);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            background: var(--tertiary-color);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--stroke-color);
+        }
+
+        .question-number {
+            font-weight: 900;
+            font-size: 13px;
+            color: var(--headline-color);
+            background-color: var(--button-bg);
+            border: 2px solid var(--stroke-color);
+            border-radius: 8px;
+            padding: 5px 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 2px 2px 0 var(--stroke-color);
+        }
+
+        .question-body { padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            color: var(--headline-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        .question-body input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+        .question-body input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background-color: #fffdf0;
+            box-shadow: 3px 3px 0px var(--stroke-color);
+        }
+
+        /* ===== ANSWER PREVIEW ===== */
+        .answer-preview {
+            padding: 16px;
+            background-color: var(--secondary-color);
+            border: 2px dashed var(--stroke-color);
+            border-radius: 12px;
+        }
+        .answer-preview-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--paragraph-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .word-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            background-color: var(--bg-color);
+            border: 2px solid var(--stroke-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 3px 3px 0px var(--stroke-color);
+            transition: transform 0.1s;
+        }
+        .chip:hover { transform: translate(-1px, -1px); }
+
+        .tip {
+            font-size: 13px;
+            color: var(--headline-color);
+            background-color: var(--tertiary-color);
+            border-left: 4px solid var(--stroke-color);
+            padding: 10px 14px;
+            border-radius: 0 10px 10px 0;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* ===== ADD QUESTION BUTTON ===== */
+        .add-question-btn {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background-color: transparent;
+            border: 3px dashed var(--stroke-color);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--headline-color);
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .add-question-btn:hover {
+            background-color: var(--secondary-color);
+            border-style: solid;
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(39,35,67,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 24px;
+            padding: 44px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 12px 12px 0px var(--stroke-color);
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.85) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .modal h3 { font-size: 26px; font-weight: 900; color: var(--headline-color); margin-bottom: 12px; }
+        .modal p { margin-bottom: 28px; line-height: 1.6; font-size: 15px; }
+        .modal .modal-actions { display: flex; gap: 12px; justify-content: center; }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--headline-color);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 14px;
+            transform: translateY(80px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 300;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+        }
+        .status-bar.show { transform: translateY(0); }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 20px 20px 8px;
+            color: var(--paragraph-color);
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* ===== SAVE TO BANK BUTTON (on question cards) ===== */
+        .save-bank-btn {
+            background: var(--bg-color);
+            border: 2px solid var(--stroke-color);
+            border-radius: 8px;
+            padding: 6px 13px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 2px 2px 0 var(--stroke-color);
+            color: var(--headline-color);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .save-bank-btn:hover { background: var(--tertiary-color); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--stroke-color); }
+        .save-bank-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--stroke-color); }
+
+        /* ===== BANK BADGE (on header button) ===== */
+        .bank-badge {
+            position: absolute;
+            top: -9px;
+            right: -9px;
+            background: #ff6b6b;
+            color: white;
+            border: 2px solid var(--stroke-color);
+            border-radius: 12px;
+            min-width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            line-height: 1;
+        }
+
+        /* ===== BANK SOAL DRAWER ===== */
+        .bank-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(39, 35, 67, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 150;
+        }
+        .bank-backdrop.active { display: block; }
+
+        .bank-drawer {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 450px;
+            height: 100vh;
+            background: var(--bg-color);
+            border-left: 3px solid var(--stroke-color);
+            z-index: 160;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.38s cubic-bezier(0.34, 1.15, 0.64, 1);
+            box-shadow: -8px 0 0 var(--stroke-color);
+        }
+        .bank-drawer.open { right: 0; }
+
+        .bank-drawer-header {
+            padding: 18px 22px;
+            border-bottom: 3px solid var(--stroke-color);
+            background: linear-gradient(135deg, var(--secondary-color), var(--tertiary-color));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .bank-drawer-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bank-drawer-icon {
+            font-size: 30px;
+            line-height: 1;
+        }
+
+        .bank-drawer-title h2 {
+            font-size: 17px;
+            font-weight: 900;
+            color: var(--headline-color);
+            letter-spacing: -0.3px;
+        }
+
+        .bank-drawer-title p {
+            font-size: 12px;
+            color: var(--paragraph-color);
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .bank-close-btn {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            background: var(--bg-color);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 900;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .bank-close-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke-color); }
+        .bank-close-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--stroke-color); }
+
+        .bank-search-wrap {
+            padding: 12px 18px;
+            border-bottom: 2px solid var(--stroke-color);
+            flex-shrink: 0;
+            background: #f8fdfd;
+        }
+
+        .bank-search-wrap input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+        }
+        .bank-search-wrap input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background: #fffdf0;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+        }
+
+        /* ===== CATEGORY FILTER (like folder tabs) ===== */
+        .bank-filter-bar {
+            padding: 10px 16px;
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--stroke-color);
+            flex-shrink: 0;
+            background: #f2fbfb;
+            min-height: 50px;
+            align-content: flex-start;
+        }
+
+        .filter-chip {
+            padding: 5px 12px;
+            border: 2px solid var(--stroke-color);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            background: var(--bg-color);
+            cursor: pointer;
+            transition: all 0.1s;
+            color: var(--headline-color);
+            box-shadow: 2px 2px 0 var(--stroke-color);
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .filter-chip:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--stroke-color); }
+        .filter-chip.active { background: var(--button-bg); }
+
+        /* ===== BANK LIST ===== */
+        .bank-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bank-list::-webkit-scrollbar { width: 5px; }
+        .bank-list::-webkit-scrollbar-track { background: var(--secondary-color); }
+        .bank-list::-webkit-scrollbar-thumb { background: var(--stroke-color); border-radius: 3px; }
+
+        .bank-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 13px 14px;
+            border: 2px solid var(--stroke-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: var(--bg-color);
+            box-shadow: 3px 3px 0 var(--stroke-color);
+            user-select: none;
+        }
+        .bank-item:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke-color); }
+        .bank-item.selected { background: #fffdf0; border-color: var(--button-bg); box-shadow: 3px 3px 0 var(--button-bg); }
+
+        .bank-checkbox {
+            width: 17px;
+            height: 17px;
+            margin-top: 3px;
+            flex-shrink: 0;
+            cursor: pointer;
+            accent-color: var(--headline-color);
+        }
+
+        .bank-item-content { flex: 1; min-width: 0; }
+
+        .bank-item-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 7px;
+        }
+
+        .bank-tag {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 3px 9px;
+            border-radius: 6px;
+            border: 1.5px solid rgba(0,0,0,0.18);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .bank-item-q {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--headline-color);
+            margin-bottom: 3px;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bank-item-a {
+            font-size: 12px;
+            color: var(--paragraph-color);
+            opacity: 0.75;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-style: italic;
+        }
+
+        .bank-delete-btn {
+            background: none;
+            border: 2px solid #ffcdd2;
+            border-radius: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 13px;
+            flex-shrink: 0;
+            transition: all 0.1s;
+            color: #c62828;
+        }
+        .bank-delete-btn:hover { background: #ffebee; border-color: #c62828; transform: scale(1.1); }
+
+        .bank-empty {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--paragraph-color);
+        }
+        .bank-empty p {
+            margin-top: 14px;
+            line-height: 1.7;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .bank-drawer-footer {
+            padding: 14px 18px;
+            border-top: 3px solid var(--stroke-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: var(--bg-color);
+            flex-shrink: 0;
+        }
+
+        .selected-count {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--paragraph-color);
+        }
+
+        /* ===== BANK CREATE BUTTON ===== */
+        .bank-create-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: transparent;
+            border: 2.5px dashed var(--stroke-color);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--headline-color);
+            transition: all 0.2s;
+            width: calc(100% - 28px);
+            margin: 8px 14px 0;
+            flex-shrink: 0;
+        }
+        .bank-create-btn:hover {
+            background: var(--secondary-color);
+            border-style: solid;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+            transform: translateY(-1px);
+        }
+        .bank-create-btn:active {
+            transform: translateY(1px);
+            box-shadow: 1px 1px 0 var(--stroke-color);
+        }
+
+        .bank-create-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+        }
+        .bank-create-input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background: #fffdf0;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+        }
+
+        /* ===== SAVE TO BANK MODAL ===== */
+        .save-bank-content {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 500px;
+            width: 95%;
+            box-shadow: 10px 10px 0px var(--stroke-color);
+            animation: popIn 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .save-bank-content h3 {
+            font-size: 19px;
+            font-weight: 900;
+            color: var(--headline-color);
+            margin-bottom: 16px;
+        }
+
+        .save-bank-preview {
+            background: var(--secondary-color);
+            border: 2px dashed var(--stroke-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+        }
+
+        .save-bank-preview .preview-q {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--headline-color);
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .save-bank-preview .preview-a {
+            font-size: 13px;
+            color: var(--paragraph-color);
+            font-style: italic;
+        }
+
+        .sb-section-label {
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--headline-color);
+            margin-bottom: 10px;
+        }
+
+        .tag-options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag-option {
+            padding: 7px 14px;
+            border: 2.5px solid var(--stroke-color);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            background: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.1s;
+            box-shadow: 2px 2px 0 var(--stroke-color);
+        }
+        .tag-option:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--stroke-color); }
+        .tag-option.active { border-color: transparent; box-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+
+        .custom-tag-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .custom-tag-row input {
+            flex: 1;
+            padding: 9px 14px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--bg-color);
+            color: var(--headline-color);
+        }
+        .custom-tag-row input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background: #fffdf0;
+        }
+
+        .custom-tag-row button {
+            padding: 9px 16px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 10px;
+            background: var(--secondary-color);
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+            transition: all 0.1s;
+            color: var(--headline-color);
+            white-space: nowrap;
+        }
+        .custom-tag-row button:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke-color); }
+        .custom-tag-row button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--stroke-color); }
+
+        .save-bank-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            header { padding: 10px 16px; }
+            .header-brand h1 { font-size: 17px; }
+            .container { padding: 20px 16px; gap: 16px; }
+            .form-row { grid-template-columns: 1fr; }
+            .progress-steps { display: none; }
+            .section-card-body { padding: 18px; }
+            .bank-drawer { width: 100vw; right: -100vw; }
+            .bank-drawer.open { right: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-brand">
+        <lottie-player src="making-quiz.json" background="transparent" speed="1"
+            style="width: 44px; height: 44px;" loop autoplay>
+        </lottie-player>
+        <h1>Buat Kuis Baru</h1>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='dashboard-guru.html'">← Kembali</button>
+        <button class="btn btn-secondary btn-bank" onclick="toggleBankDrawer()">
+            <lottie-player src="safetybox.json" background="transparent" speed="1"
+                style="width:22px;height:22px;" loop autoplay></lottie-player>
+            Bank Soal
+            <span class="bank-badge" id="bankBadge">0</span>
+        </button>
+        <button class="btn btn-primary" onclick="simpanKuis()">
+            <lottie-player src="save-quiz.json" background="transparent" speed="1"
+                style="width: 26px; height: 26px;" loop autoplay>
+            </lottie-player>
+            Simpan Kuis
+        </button>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step active">
+            <div class="step-num">1</div>
+            <span class="step-label">Info Kuis</span>
+        </div>
+        <div class="step active">
+            <div class="step-num">2</div>
+            <span class="step-label">Buat Soal</span>
+        </div>
+        <div class="step pending">
+            <div class="step-num">3</div>
+            <span class="step-label">Simpan &amp; Bagikan</span>
+        </div>
+    </div>
+
+    <!-- Informasi Kuis -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <lottie-player src="quiz-info.json" background="transparent" speed="1"
+                style="width: 48px; height: 48px;" loop autoplay>
+            </lottie-player>
+            <h2>Informasi Kuis</h2>
+        </div>
+        <div class="section-card-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Judul Kuis</label>
+                    <input type="text" id="judulKuis" placeholder="Misal: Kosakata Bahasa Indonesia Kelas 5">
+                </div>
+                <div class="form-group">
+                    <label>Mata Pelajaran</label>
+                    <select id="mataPelajaran">
+                        <option value="">-- Pilih Mapel --</option>
+                        <option>Bahasa Indonesia</option>
+                        <option>Bahasa Inggris</option>
+                        <option>IPA</option>
+                        <option>IPS</option>
+                        <option>Matematika</option>
+                        <option>PPKn</option>
+                        <option>Lainnya</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Soal -->
+    <div class="section-card">
+        <div class="section-card-header">
+            <lottie-player src="quetion.json" background="transparent" speed="1"
+                style="width: 48px; height: 48px;" loop autoplay>
+            </lottie-player>
+            <h2>Daftar Soal</h2>
+            <div class="section-card-header-right">
+                <span class="count-badge" id="soalCount">0</span>
+            </div>
+        </div>
+        <div class="section-card-body">
+            <div class="question-list" id="questionList"></div>
+
+            <button class="add-question-btn" onclick="tambahSoal()">
+                ➕ Tambah Soal Baru
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Sukses -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal">
+        <lottie-player src="confetti.json" background="transparent" speed="1"
+            style="width: 110px; height: 110px; margin: 0 auto;" loop autoplay>
+        </lottie-player>
+        <h3>Kuis Tersimpan!</h3>
+        <p>Kuis "<span id="savedTitle"></span>" berhasil disimpan. Kamu bisa langsung mulai sesi dari Dashboard.</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Buat Kuis Lain</button>
+            <button class="btn btn-primary" onclick="window.location.href='dashboard-guru.html'">Ke Dashboard</button>
+        </div>
+    </div>
+</div>
+
+<div class="status-bar" id="statusBar"></div>
+
+<!-- ===== BANK SOAL DRAWER ===== -->
+<div class="bank-backdrop" id="bankBackdrop" onclick="closeBankDrawer()"></div>
+<div class="bank-drawer" id="bankDrawer">
+
+    <div class="bank-drawer-header">
+        <div class="bank-drawer-title">
+            <lottie-player src="safetybox.json" background="transparent" speed="1"
+                style="width:36px;height:36px;flex-shrink:0;" loop autoplay></lottie-player>
+            <div>
+                <h2>Bank Soal</h2>
+                <p id="bankCount">0 soal tersimpan</p>
+            </div>
+        </div>
+        <button class="bank-close-btn" onclick="closeBankDrawer()">✕</button>
+    </div>
+
+    <div class="bank-search-wrap">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <lottie-player src="search.json" background="transparent" speed="1"
+                style="width:22px;height:22px;flex-shrink:0;" loop autoplay></lottie-player>
+            <input type="text" placeholder="Cari pertanyaan atau jawaban..."
+                id="bankSearch" oninput="renderBankItems()" style="flex:1;width:auto;">
+        </div>
+    </div>
+
+    <div class="bank-filter-bar" id="bankFilterBar">
+        <button class="filter-chip active" onclick="setBankFilter('semua')">Semua (0)</button>
+    </div>
+
+    <button class="bank-create-btn" onclick="buatSoalDiBank()">
+        <lottie-player src="writing.json" background="transparent" speed="1"
+            style="width:22px;height:22px;" loop autoplay></lottie-player>
+        Buat Soal Baru untuk Bank
+    </button>
+
+    <div class="bank-list" id="bankList">
+        <div class="bank-empty">
+            <lottie-player src="inventory.json" background="transparent" speed="1"
+                style="width:90px;height:90px;margin:0 auto;" loop autoplay></lottie-player>
+            <p>Bank soal masih kosong.<br>Klik <b>💾 Simpan ke Bank</b> pada soal<br>yang sudah kamu buat!</p>
+        </div>
+    </div>
+
+    <div class="bank-drawer-footer">
+        <span class="selected-count" id="selectedCount">Pilih soal untuk diimpor</span>
+        <button class="btn btn-primary" id="importBtn" onclick="imporDariBank()" disabled>
+            <lottie-player src="import.json" background="transparent" speed="1"
+                style="width:22px;height:22px;" loop autoplay></lottie-player>
+            Impor ke Kuis
+        </button>
+    </div>
+</div>
+
+<!-- ===== SAVE TO BANK MODAL ===== -->
+<div class="modal-overlay" id="saveBankModal">
+    <div class="save-bank-content">
+        <h3 style="display:flex;align-items:center;gap:10px;">
+            <lottie-player src="save-quiz.json" background="transparent" speed="1"
+                style="width:28px;height:28px;flex-shrink:0;" loop autoplay></lottie-player>
+            <span id="saveBankModalTitle">Simpan ke Bank Soal</span>
+        </h3>
+
+        <div id="createModeInputs" style="display:none; margin-bottom:16px;">
+            <div class="sb-section-label">🔤 Pertanyaan</div>
+            <input type="text" id="newBankQ" class="bank-create-input"
+                placeholder="Misal: Apa ibukota Indonesia?">
+            <div class="sb-section-label" style="margin-top:12px;display:flex;align-items:center;gap:6px;">
+                <lottie-player src="check-box.json" background="transparent" speed="1"
+                    style="width:16px;height:16px;" loop autoplay></lottie-player>
+                Jawaban Benar (susunan kata yang benar)
+            </div>
+            <input type="text" id="newBankA" class="bank-create-input"
+                placeholder="Misal: Jakarta adalah ibukota Indonesia" style="margin-top:4px;">
+            <p class="tip" style="margin-top:8px;">💡 Jawaban akan dipotong per kata dan diacak menjadi pilihan kata untuk siswa.</p>
+        </div>
+
+        <div id="saveModePreview" class="save-bank-preview">
+            <div class="preview-q" id="saveBankQ"></div>
+            <div class="preview-a" id="saveBankA"></div>
+        </div>
+
+        <div class="sb-section-label">🏷️ Pilih Kategori / Mata Pelajaran</div>
+        <div class="tag-options-grid" id="saveBankTagsContainer"></div>
+
+        <div class="sb-section-label" style="display:flex;align-items:center;gap:6px;">
+            <lottie-player src="writing.json" background="transparent" speed="1"
+                style="width:16px;height:16px;" loop autoplay></lottie-player>
+            Tambah Tag Kustom
+        </div>
+        <div class="custom-tag-row">
+            <input type="text" placeholder="Misal: Kelas 5, Semester 1, Ulangan Harian..."
+                id="customTagInput"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}">
+            <button onclick="addCustomTag()">+ Tambah</button>
+        </div>
+
+        <div class="save-bank-actions">
+            <button class="btn btn-secondary" onclick="closeSaveBankModal()">Batal</button>
+            <button class="btn btn-primary" onclick="konfirmasiSimpanBank()">
+                <lottie-player src="save-quiz.json" background="transparent" speed="1"
+                    style="width:20px;height:20px;" loop autoplay></lottie-player>
+                Simpan ke Bank
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('id');
+    const editMode = !!editId;
+
+    if (editMode) {
+        document.querySelector('.header-brand h1').textContent = 'Edit Kuis';
+        document.querySelector('.btn-primary').innerHTML =
+            `<lottie-player src="save-quiz.json" background="transparent" speed="1" style="width: 26px; height: 26px;" loop autoplay></lottie-player> Simpan Perubahan`;
+        document.querySelector('#successModal h3').textContent = 'Kuis Diperbarui!';
+        document.querySelector('#successModal p').innerHTML =
+            `Perubahan pada kuis "<span id="savedTitle"></span>" berhasil disimpan.`;
+        document.querySelector('#successModal .btn-secondary').textContent = 'Kembali ke Dashboard';
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            alert("Sesi habis. Silakan login kembali.");
+            window.location.href = 'login-guru.html';
+        } else {
+            window.currentUser = user;
+            await initBankBadge(user.uid);
+            if (editMode) {
+                await muatDataEdit();
+            } else {
+                window.tambahSoal();
+            }
+        }
+    });
+
+    let questionCount = 0;
+
+    // ===== LOAD DATA KUIS UNTUK EDIT =====
+    async function muatDataEdit() {
+        try {
+            const snap = await getDoc(doc(db, "kuis", editId));
+            if (!snap.exists()) {
+                alert("Kuis tidak ditemukan.");
+                window.location.href = 'dashboard-guru.html';
+                return;
+            }
+            const data = snap.data();
+            document.getElementById('judulKuis').value = data.judul;
+            document.getElementById('mataPelajaran').value = data.mata_pelajaran;
+            for (const soal of data.soal) {
+                window.tambahSoal();
+                document.getElementById(`pertanyaan-${questionCount}`).value = soal.pertanyaan;
+                document.getElementById(`jawaban-${questionCount}`).value = soal.jawaban;
+                window.updatePreview(questionCount);
+            }
+        } catch (err) {
+            alert("Gagal memuat data kuis: " + err.message);
+            window.location.href = 'dashboard-guru.html';
+        }
+    }
+
+    // ===== RENUMBER SOAL =====
+    function renumberQuestions() {
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach((card, idx) => {
+            const badge = card.querySelector('.question-number');
+            if (badge) badge.textContent = `Soal ${idx + 1}`;
+        });
+        document.getElementById('soalCount').textContent = cards.length;
+    }
+
+    // ===== TAMBAH SOAL =====
+    window.tambahSoal = function() {
+        questionCount++;
+
+        const list = document.getElementById('questionList');
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `soal-${questionCount}`;
+        card.innerHTML = `
+            <div class="question-header">
+                <span class="question-number">Soal ${questionCount}</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="save-bank-btn" onclick="simpanKeBank(${questionCount})"><lottie-player src="save-quiz.json" background="transparent" speed="1" style="width:16px;height:16px;" loop autoplay></lottie-player> Simpan ke Bank</button>
+                    <button class="btn btn-danger" style="padding:6px 14px; font-size:13px;" onclick="hapusSoal(${questionCount})">🗑 Hapus</button>
+                </div>
+            </div>
+            <div class="question-body">
+                <div>
+                    <div class="field-label">🔤 Pertanyaan</div>
+                    <input type="text" id="pertanyaan-${questionCount}"
+                        placeholder="Misal: Apa ibukota Indonesia?"
+                        oninput="updatePreview(${questionCount})">
+                </div>
+                <div>
+                    <div class="field-label">
+                        <lottie-player src="check-list.json" background="transparent" speed="1"
+                            style="width: 22px; height: 22px;" loop autoplay>
+                        </lottie-player>
+                        Jawaban Benar (susunan kata yang benar)
+                    </div>
+                    <input type="text" id="jawaban-${questionCount}"
+                        placeholder="Misal: Jakarta adalah ibukota Indonesia"
+                        oninput="updatePreview(${questionCount})">
+                    <p class="tip" style="margin-top:8px;">💡 Jawaban akan dipotong per kata dan diacak menjadi pilihan kata untuk siswa.</p>
+                </div>
+                <div class="answer-preview" id="preview-${questionCount}">
+                    <div class="answer-preview-label">🔀 Preview kata untuk siswa:</div>
+                    <div class="word-chips" id="chips-${questionCount}">
+                        <span style="color: var(--paragraph-color); font-size:13px; font-style:italic;">Ketik jawaban di atas untuk melihat preview...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
+        renumberQuestions();
+    };
+
+    // ===== UPDATE PREVIEW =====
+    window.updatePreview = function(num) {
+        const jawaban = document.getElementById(`jawaban-${num}`).value.trim();
+        const chipsEl = document.getElementById(`chips-${num}`);
+
+        if (!jawaban) {
+            chipsEl.innerHTML = '<span style="color: var(--paragraph-color); font-size:13px; font-style:italic;">Ketik jawaban di atas untuk melihat preview...</span>';
+            return;
+        }
+
+        const kata = jawaban.split(' ').filter(k => k.length > 0);
+        const acak = [...kata].sort(() => Math.random() - 0.5);
+        chipsEl.innerHTML = acak.map(k => `<span class="chip">${k}</span>`).join('');
+    };
+
+    // ===== HAPUS SOAL =====
+    window.hapusSoal = function(num) {
+        const card = document.getElementById(`soal-${num}`);
+        if (card) {
+            card.style.animation = 'slideIn 0.2s ease-out reverse';
+            setTimeout(() => {
+                card.remove();
+                renumberQuestions();
+            }, 200);
+        }
+    };
+
+    // ===== SIMPAN KUIS =====
+    window.simpanKuis = async function() {
+        if (!window.currentUser) {
+            showErrorModal(
+                '🔐 Sesi Login Habis',
+                'Anda tidak sedang login atau sesi telah berakhir. Silakan login kembali.',
+                'Login Ulang',
+                () => window.location.href = 'login-guru.html'
+            );
+            return;
+        }
+
+        const judul = document.getElementById('judulKuis').value.trim();
+        const mapel = document.getElementById('mataPelajaran').value;
+
+        if (!judul) { showStatus('⚠️ Harap isi judul kuis!'); return; }
+        if (!mapel) { showStatus('⚠️ Harap pilih mata pelajaran!'); return; }
+
+        const cards = document.querySelectorAll('.question-card');
+        if (cards.length === 0) { showStatus('⚠️ Tambahkan minimal 1 soal!'); return; }
+
+        const soalList = [];
+        let valid = true;
+
+        cards.forEach((card, idx) => {
+            const num = card.id.replace('soal-', '');
+            const pertanyaan = document.getElementById(`pertanyaan-${num}`)?.value.trim();
+            const jawaban = document.getElementById(`jawaban-${num}`)?.value.trim();
+
+            if (!pertanyaan || !jawaban) {
+                showStatus(`⚠️ Soal ${idx + 1} belum lengkap!`);
+                valid = false;
+                return;
+            }
+
+            const kata = jawaban.split(' ').filter(k => k.length > 0);
+            soalList.push({
+                urutan: idx + 1,
+                pertanyaan: pertanyaan,
+                jawaban: jawaban,
+                kata_jawaban: kata,
+                kata_acak: [...kata].sort(() => Math.random() - 0.5)
+            });
+        });
+
+        if (!valid) return;
+
+        const saveBtn = document.querySelector('.btn-primary');
+        const originalHTML = saveBtn.innerHTML;
+        saveBtn.innerHTML = `<lottie-player src="hourglass.json" background="transparent" speed="1" style="width: 26px; height: 26px;" loop autoplay></lottie-player> Menyimpan...`;
+        saveBtn.disabled = true;
+
+        try {
+            if (editMode) {
+                await updateDoc(doc(db, "kuis", editId), {
+                    judul: judul,
+                    mata_pelajaran: mapel,
+                    soal: soalList,
+                    jumlah_soal: soalList.length,
+                    diperbarui_pada: serverTimestamp()
+                });
+                console.log("✅ Kuis diperbarui! ID:", editId);
+            } else {
+                const docRef = await addDoc(collection(db, "kuis"), {
+                    judul: judul,
+                    mata_pelajaran: mapel,
+                    soal: soalList,
+                    guru_uid: window.currentUser.uid,
+                    dibuat_pada: serverTimestamp(),
+                    jumlah_soal: soalList.length
+                });
+                console.log("✅ Kuis tersimpan! ID:", docRef.id);
+            }
+            document.getElementById('savedTitle').textContent = judul;
+            document.getElementById('successModal').classList.add('active');
+
+        } catch (err) {
+            console.error("❌ Error menyimpan:", err.code, err.message);
+
+            let judulError = '❌ Gagal Menyimpan Kuis';
+            let pesanError = err.message;
+            let aksiLabel = 'Tutup';
+            let aksiCallback = null;
+
+            if (err.code === 'permission-denied' || err.message.includes('permission')) {
+                judulError = '🚫 Izin Ditolak Firebase';
+                pesanError = 'Firebase menolak penyimpanan karena aturan keamanan (Firestore Rules) belum diatur.\n\nAnda perlu mengatur Rules di Firebase Console:\n\nFirestore Database → Rules → ubah isinya (lihat panduan di bawah).';
+                aksiLabel = 'Ke Firebase Console';
+                aksiCallback = () => window.open('https://console.firebase.google.com/project/playwithme-9d9e7/firestore/rules', '_blank');
+            } else if (err.code === 'unauthenticated' || err.message.includes('auth')) {
+                judulError = '🔐 Tidak Terautentikasi';
+                pesanError = 'Firebase tidak mengenali Anda sebagai pengguna yang login. Coba login ulang.';
+                aksiLabel = 'Login Ulang';
+                aksiCallback = () => window.location.href = 'login-guru.html';
+            } else if (err.message.includes('network') || err.message.includes('offline')) {
+                judulError = '📡 Masalah Koneksi';
+                pesanError = 'Gagal terhubung ke server Firebase. Periksa koneksi internet Anda lalu coba lagi.';
+            }
+
+            showErrorModal(judulError, pesanError, aksiLabel, aksiCallback);
+        } finally {
+            saveBtn.innerHTML = originalHTML;
+            saveBtn.disabled = false;
+        }
+    };
+
+    // ===== MODAL ERROR =====
+    function showErrorModal(judul, pesan, aksiLabel, aksiCallback) {
+        let modal = document.getElementById('errorModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'errorModal';
+            modal.style.cssText = `
+                display:flex; position:fixed; inset:0; background:rgba(39,35,67,0.7);
+                backdrop-filter:blur(4px); z-index:500; align-items:center;
+                justify-content:center; padding:20px;
+            `;
+            modal.innerHTML = `
+                <div style="background:var(--bg-color); border:3px solid var(--stroke-color); border-radius:20px;
+                    padding:36px; max-width:460px; width:100%; box-shadow:10px 10px 0px var(--stroke-color); text-align:center;">
+                    <div style="font-size:50px; margin-bottom:14px;">⚠️</div>
+                    <h3 id="errTitle" style="font-size:20px; color:var(--headline-color); margin-bottom:12px;"></h3>
+                    <p id="errMsg" style="font-size:14px; line-height:1.7; margin-bottom:24px; text-align:left;
+                        background:#fff8f8; border:2px solid #fca5a5; border-radius:8px; padding:14px;
+                        white-space:pre-wrap; word-break:break-word;"></p>
+                    <div style="display:flex; gap:12px; justify-content:center;">
+                        <button id="errClose" style="background:var(--bg-color); border:3px solid var(--stroke-color);
+                            border-radius:10px; padding:10px 22px; font-weight:800; cursor:pointer;
+                            box-shadow:3px 3px 0 var(--stroke-color);">Tutup</button>
+                        <button id="errAction" style="background:var(--button-bg); border:3px solid var(--stroke-color);
+                            border-radius:10px; padding:10px 22px; font-weight:800; cursor:pointer;
+                            box-shadow:3px 3px 0 var(--stroke-color); display:none;"></button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('errClose').onclick = () => modal.style.display = 'none';
+        }
+
+        document.getElementById('errTitle').textContent = judul;
+        document.getElementById('errMsg').textContent = pesan;
+
+        const actionBtn = document.getElementById('errAction');
+        if (aksiCallback) {
+            actionBtn.style.display = 'inline-block';
+            actionBtn.textContent = aksiLabel;
+            actionBtn.onclick = () => { modal.style.display = 'none'; aksiCallback(); };
+        } else {
+            actionBtn.style.display = 'none';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        document.getElementById('successModal').classList.remove('active');
+        if (editMode) {
+            window.location.href = 'dashboard-guru.html';
+            return;
+        }
+        document.getElementById('judulKuis').value = '';
+        document.getElementById('mataPelajaran').value = '';
+        document.getElementById('questionList').innerHTML = '';
+        questionCount = 0;
+        document.getElementById('soalCount').textContent = 0;
+    };
+
+    function showStatus(msg) {
+        const bar = document.getElementById('statusBar');
+        bar.textContent = msg;
+        bar.classList.add('show');
+        setTimeout(() => bar.classList.remove('show'), 3000);
+    }
+
+    // =======================================================
+    // ===== BANK SOAL (Firestore) ===========================
+    // =======================================================
+
+    let currentBankFilter = 'semua';
+    let isCreateMode = false;
+    let pendingSaveData = null;
+    let selectedTags = [];
+
+    const MAPEL_OPTIONS = [
+        'Bahasa Indonesia', 'Bahasa Inggris', 'IPA', 'IPS', 'Matematika', 'PPKn', 'Lainnya'
+    ];
+
+    const TAG_COLORS = {
+        'Bahasa Indonesia': { bg: '#ff6b6b', text: '#fff' },
+        'Bahasa Inggris':   { bg: '#4ecdc4', text: '#272343' },
+        'IPA':              { bg: '#6bcb77', text: '#272343' },
+        'IPS':              { bg: '#ffd166', text: '#272343' },
+        'Matematika':       { bg: '#c77dff', text: '#fff' },
+        'PPKn':             { bg: '#4cc9f0', text: '#272343' },
+        'Lainnya':          { bg: '#aaaaaa', text: '#fff' },
+    };
+
+    function getTagStyle(tag) {
+        return TAG_COLORS[tag] || { bg: '#bae8e8', text: '#272343' };
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(text));
+        return d.innerHTML;
+    }
+
+    async function initBankBadge(uid) {
+        try {
+            const snap = await getDocs(query(collection(db, "bank_soal"), where("guru_uid", "==", uid)));
+            document.getElementById('bankBadge').textContent = snap.size;
+        } catch { /* abaikan jika gagal, badge tetap 0 */ }
+    }
+
+    function shiftBankBadge(delta) {
+        const badge = document.getElementById('bankBadge');
+        if (!badge) return;
+        badge.textContent = Math.max(0, (parseInt(badge.textContent) || 0) + delta);
+    }
+
+    // ===== DRAWER =====
+
+    window.toggleBankDrawer = function() {
+        const drawer = document.getElementById('bankDrawer');
+        const isOpen = drawer.classList.toggle('open');
+        document.getElementById('bankBackdrop').classList.toggle('active', isOpen);
+        if (isOpen) renderBankItems();
+    };
+
+    window.closeBankDrawer = function() {
+        document.getElementById('bankDrawer').classList.remove('open');
+        document.getElementById('bankBackdrop').classList.remove('active');
+    };
+
+    window.buatSoalDiBank = function() {
+        isCreateMode = true;
+        pendingSaveData = null;
+        selectedTags = [];
+        document.getElementById('saveBankModalTitle').textContent = 'Buat Soal Baru';
+        document.getElementById('createModeInputs').style.display = 'block';
+        document.getElementById('saveModePreview').style.display = 'none';
+        document.getElementById('newBankQ').value = '';
+        document.getElementById('newBankA').value = '';
+        document.getElementById('customTagInput').value = '';
+        renderSaveBankTags();
+        document.getElementById('saveBankModal').classList.add('active');
+    };
+
+    window.setBankFilter = function(filter) {
+        currentBankFilter = filter;
+        renderBankItems();
+    };
+
+    window.renderBankItems = async function() {
+        if (!window.currentUser) return;
+
+        const list = document.getElementById('bankList');
+        const filterBar = document.getElementById('bankFilterBar');
+        const search = (document.getElementById('bankSearch')?.value || '').toLowerCase();
+
+        // Tampilkan loading
+        list.innerHTML = `<div class="bank-empty"><lottie-player src="hourglass.json" background="transparent" speed="1" style="width:70px;height:70px;margin:0 auto;" loop autoplay></lottie-player><p>Memuat soal...</p></div>`;
+        filterBar.innerHTML = `<button class="filter-chip active">Semua</button>`;
+
+        let bank = [];
+        try {
+            const snap = await getDocs(query(
+                collection(db, "bank_soal"),
+                where("guru_uid", "==", window.currentUser.uid)
+            ));
+            bank = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            // Urutkan terbaru di atas (client-side, tanpa composite index)
+            bank.sort((a, b) => (b.dibuat_pada?.toMillis?.() || 0) - (a.dibuat_pada?.toMillis?.() || 0));
+        } catch (err) {
+            list.innerHTML = `<div class="bank-empty"><div style="font-size:40px;">⚠️</div><p>Gagal memuat soal.<br><small>${escapeHtml(err.message)}</small></p></div>`;
+            return;
+        }
+
+        // Update badge dan count
+        document.getElementById('bankBadge').textContent = bank.length;
+        document.getElementById('bankCount').textContent = `${bank.length} soal tersimpan`;
+
+        // Bangun filter chips per kategori
+        const allTags = [...new Set(bank.flatMap(s => s.tags || []))];
+        const filterItems = [
+            { key: 'semua', label: `Semua (${bank.length})` },
+            ...allTags.map(t => ({
+                key: t,
+                label: `${t} (${bank.filter(s => (s.tags || []).includes(t)).length})`
+            }))
+        ];
+        filterBar.innerHTML = filterItems.map(f => `
+            <button class="filter-chip ${currentBankFilter === f.key ? 'active' : ''}"
+                onclick="setBankFilter('${f.key.replace(/'/g, "\\'")}')">
+                ${escapeHtml(f.label)}
+            </button>
+        `).join('');
+
+        // Filter berdasarkan kategori aktif dan pencarian
+        const filtered = bank.filter(s => {
+            const matchFilter = currentBankFilter === 'semua' || (s.tags || []).includes(currentBankFilter);
+            const matchSearch = !search ||
+                s.pertanyaan.toLowerCase().includes(search) ||
+                s.jawaban.toLowerCase().includes(search);
+            return matchFilter && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = `
+                <div class="bank-empty">
+                    ${bank.length === 0
+                        ? `<lottie-player src="inventory.json" background="transparent" speed="1" style="width:90px;height:90px;margin:0 auto;" loop autoplay></lottie-player>`
+                        : `<lottie-player src="search.json" background="transparent" speed="1" style="width:80px;height:80px;margin:0 auto;" loop autoplay></lottie-player>`
+                    }
+                    <p>${bank.length === 0
+                        ? 'Bank soal masih kosong.<br>Klik <b>✏️ Buat Soal Baru</b> di atas,<br>atau <b>💾 Simpan ke Bank</b> dari kartu soal!'
+                        : 'Tidak ada soal yang cocok<br>dengan pencarian atau filter ini.'
+                    }</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(soal => {
+            const tagsHtml = (soal.tags || []).length
+                ? soal.tags.map(t => {
+                    const s = getTagStyle(t);
+                    return `<span class="bank-tag" style="background:${s.bg};color:${s.text};">${escapeHtml(t)}</span>`;
+                  }).join('')
+                : `<span class="bank-tag" style="background:#e0e0e0;color:#555;">Tanpa kategori</span>`;
+
+            return `
+                <div class="bank-item" id="bank-item-${soal.id}" onclick="toggleBankItem('${soal.id}')">
+                    <input type="checkbox" class="bank-checkbox" id="chk-${soal.id}" value="${soal.id}"
+                        onclick="event.stopPropagation()" onchange="updateImportBtn()">
+                    <div class="bank-item-content">
+                        <div class="bank-item-tags">${tagsHtml}</div>
+                        <div class="bank-item-q">${escapeHtml(soal.pertanyaan)}</div>
+                        <div class="bank-item-a">${escapeHtml(soal.jawaban)}</div>
+                    </div>
+                    <button class="bank-delete-btn" onclick="hapusDariBank(event,'${soal.id}')">🗑</button>
+                </div>`;
+        }).join('');
+
+        updateImportBtn();
+    };
+
+    window.toggleBankItem = function(id) {
+        const cb = document.getElementById(`chk-${id}`);
+        const item = document.getElementById(`bank-item-${id}`);
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        item.classList.toggle('selected', cb.checked);
+        updateImportBtn();
+    };
+
+    window.updateImportBtn = function() {
+        const checked = document.querySelectorAll('.bank-checkbox:checked').length;
+        const btn = document.getElementById('importBtn');
+        const countEl = document.getElementById('selectedCount');
+        if (btn) btn.disabled = checked === 0;
+        if (countEl) countEl.textContent = checked === 0
+            ? 'Pilih soal untuk diimpor'
+            : `${checked} soal dipilih`;
+    };
+
+    window.hapusDariBank = async function(e, id) {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await deleteDoc(doc(db, "bank_soal", id));
+            shiftBankBadge(-1);
+            renderBankItems();
+            showStatus('🗑️ Soal dihapus dari bank');
+        } catch (err) {
+            showStatus('❌ Gagal menghapus: ' + err.message);
+        }
+    };
+
+    window.imporDariBank = function() {
+        const checked = [...document.querySelectorAll('.bank-checkbox:checked')];
+        if (!checked.length) return;
+
+        // Ambil teks dari DOM (textContent selalu full text meskipun CSS truncated)
+        const selected = checked.map(cb => {
+            const item = document.getElementById(`bank-item-${cb.value}`);
+            return {
+                pertanyaan: item?.querySelector('.bank-item-q')?.textContent?.trim() || '',
+                jawaban:    item?.querySelector('.bank-item-a')?.textContent?.trim() || ''
+            };
+        }).filter(s => s.pertanyaan);
+
+        selected.forEach(soal => tambahSoalDenganData(soal.pertanyaan, soal.jawaban));
+        window.closeBankDrawer();
+        showStatus(`✅ ${selected.length} soal berhasil diimpor ke kuis!`);
+    };
+
+    function tambahSoalDenganData(pertanyaan, jawaban) {
+        window.tambahSoal();
+        const cards = document.querySelectorAll('.question-card');
+        const num = cards[cards.length - 1].id.replace('soal-', '');
+        document.getElementById(`pertanyaan-${num}`).value = pertanyaan;
+        document.getElementById(`jawaban-${num}`).value = jawaban;
+        window.updatePreview(parseInt(num));
+    }
+
+    // ===== SAVE TO BANK =====
+
+    window.simpanKeBank = function(num) {
+        const pertanyaan = document.getElementById(`pertanyaan-${num}`)?.value.trim();
+        const jawaban = document.getElementById(`jawaban-${num}`)?.value.trim();
+
+        if (!pertanyaan || !jawaban) {
+            showStatus('⚠️ Isi pertanyaan dan jawaban terlebih dulu!');
+            return;
+        }
+
+        isCreateMode = false;
+        pendingSaveData = { pertanyaan, jawaban };
+        selectedTags = [];
+
+        const mapel = document.getElementById('mataPelajaran')?.value;
+        if (mapel) selectedTags = [mapel];
+
+        document.getElementById('saveBankModalTitle').textContent = 'Simpan ke Bank Soal';
+        document.getElementById('createModeInputs').style.display = 'none';
+        document.getElementById('saveModePreview').style.display = 'block';
+        document.getElementById('saveBankQ').textContent = pertanyaan;
+        document.getElementById('saveBankA').textContent = '→ ' + jawaban;
+        document.getElementById('customTagInput').value = '';
+        renderSaveBankTags();
+        document.getElementById('saveBankModal').classList.add('active');
+    };
+
+    window.closeSaveBankModal = function() {
+        document.getElementById('saveBankModal').classList.remove('active');
+        pendingSaveData = null;
+    };
+
+    function renderSaveBankTags() {
+        const container = document.getElementById('saveBankTagsContainer');
+        const mapelChips = MAPEL_OPTIONS.map(m => {
+            const style = getTagStyle(m);
+            const active = selectedTags.includes(m);
+            const activeStyle = active ? `background:${style.bg};color:${style.text};border-color:transparent;` : '';
+            return `<button class="tag-option ${active ? 'active' : ''}"
+                onclick="toggleSaveTag('${m}')" style="${activeStyle}">${m}</button>`;
+        }).join('');
+
+        const customChips = selectedTags
+            .filter(t => !MAPEL_OPTIONS.includes(t))
+            .map(t => {
+                const style = getTagStyle(t);
+                return `<button class="tag-option active"
+                    onclick="removeCustomTag('${t.replace(/'/g, "\\'")}')"
+                    style="background:${style.bg};color:${style.text};border-color:transparent;">
+                    ${escapeHtml(t)} ✕</button>`;
+            }).join('');
+
+        container.innerHTML = mapelChips + customChips;
+    }
+
+    window.toggleSaveTag = function(tag) {
+        selectedTags = selectedTags.includes(tag)
+            ? selectedTags.filter(t => t !== tag)
+            : [...selectedTags, tag];
+        renderSaveBankTags();
+    };
+
+    window.removeCustomTag = function(tag) {
+        selectedTags = selectedTags.filter(t => t !== tag);
+        renderSaveBankTags();
+    };
+
+    window.addCustomTag = function() {
+        const input = document.getElementById('customTagInput');
+        const tag = input.value.trim();
+        if (tag && !selectedTags.includes(tag)) {
+            selectedTags.push(tag);
+            input.value = '';
+            renderSaveBankTags();
+        }
+    };
+
+    window.konfirmasiSimpanBank = async function() {
+        if (!window.currentUser) return;
+
+        let pertanyaan, jawaban;
+        if (isCreateMode) {
+            pertanyaan = document.getElementById('newBankQ').value.trim();
+            jawaban = document.getElementById('newBankA').value.trim();
+            if (!pertanyaan || !jawaban) {
+                showStatus('⚠️ Isi pertanyaan dan jawaban terlebih dulu!');
+                return;
+            }
+        } else {
+            if (!pendingSaveData) return;
+            pertanyaan = pendingSaveData.pertanyaan;
+            jawaban = pendingSaveData.jawaban;
+        }
+
+        const saveBtn = document.querySelector('#saveBankModal .btn-primary');
+        const origHTML = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<lottie-player src="hourglass.json" background="transparent" speed="1" style="width:20px;height:20px;" loop autoplay></lottie-player> Menyimpan...';
+        saveBtn.disabled = true;
+
+        try {
+            await addDoc(collection(db, "bank_soal"), {
+                guru_uid:    window.currentUser.uid,
+                pertanyaan:  pertanyaan,
+                jawaban:     jawaban,
+                tags:        [...selectedTags],
+                dibuat_pada: serverTimestamp()
+            });
+            shiftBankBadge(+1);
+            window.closeSaveBankModal();
+            // Refresh drawer jika sedang terbuka (khususnya setelah create mode)
+            if (document.getElementById('bankDrawer').classList.contains('open')) {
+                renderBankItems();
+            }
+            showStatus('✅ Soal berhasil disimpan ke bank!');
+        } catch (err) {
+            showStatus('❌ Gagal menyimpan ke bank: ' + err.message);
+        } finally {
+            saveBtn.innerHTML = origHTML;
+            saveBtn.disabled = false;
+        }
+    };
+
+</script>
+
+</body>
+</html>

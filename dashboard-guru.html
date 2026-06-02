@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Dashboard Guru</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+            --danger-color: #ff8906;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg-color); color: var(--paragraph-color); display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ── HEADER ── */
+        header {
+            padding: 14px 40px;
+            background-color: var(--tertiary-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-brand .brand-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--headline-color);
+        }
+
+        .header-brand .divider {
+            font-size: 18px;
+            color: var(--stroke-color);
+            opacity: 0.35;
+        }
+
+        .header-brand .page-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--paragraph-color);
+        }
+
+        .btn-logout {
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            border: 3px solid var(--stroke-color);
+            padding: 8px 18px;
+            font-weight: 800;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px var(--stroke-color);
+            transition: all 0.1s;
+        }
+        .btn-logout:active { transform: translate(3px, 3px); box-shadow: none; }
+
+        /* ── WELCOME BANNER ── */
+        .welcome-banner {
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            padding: 40px 40px;
+        }
+
+        .welcome-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .welcome-text .overline {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--paragraph-color);
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        .welcome-text h2 {
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--headline-color);
+            line-height: 1.15;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text p {
+            font-size: 16px;
+            color: var(--paragraph-color);
+            line-height: 1.6;
+        }
+
+        /* ── SECTION WRAPPER ── */
+        .section-wrap {
+            padding: 48px 40px;
+        }
+
+        .section-wrap.teal { background-color: var(--secondary-color); border-bottom: 3px solid var(--stroke-color); }
+        .section-wrap.white { background-color: var(--bg-color); flex: 1; }
+
+        .section-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--headline-color);
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 3px solid var(--stroke-color);
+        }
+
+        /* ── ACTION CARDS ── */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .action-card {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 6px 6px 0px var(--stroke-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-card:hover { transform: translateY(-4px); box-shadow: 10px 10px 0px var(--stroke-color); }
+        .action-card.primary { background-color: var(--bg-color); }
+
+        .action-card h4 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--headline-color);
+            margin-bottom: 10px;
+        }
+
+        .action-card p {
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 24px;
+            flex: 1;
+        }
+
+        /* ── QUIZ LIST ── */
+        .kuis-list { display: flex; flex-direction: column; gap: 14px; }
+
+        .kuis-item {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 14px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            transition: all 0.2s;
+        }
+        .kuis-item:hover { transform: translateX(4px); }
+
+        .kuis-info h4 { font-size: 17px; color: var(--headline-color); margin-bottom: 6px; font-weight: 700; }
+        .kuis-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 2px solid var(--stroke-color);
+        }
+        .badge-mapel { background: var(--tertiary-color); }
+        .badge-soal { background: var(--button-bg); }
+
+        .kuis-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 3px solid var(--stroke-color);
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            transition: all 0.1s;
+            align-self: stretch;
+        }
+        .btn:active { transform: translate(4px, 4px); box-shadow: none; }
+        .btn-outline { background-color: var(--bg-color); }
+        .btn-hapus { background-color: var(--danger-color); color: white; }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 800;
+            border: 2px solid var(--stroke-color);
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px var(--stroke-color);
+            transition: all 0.1s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-sm:active { transform: translate(3px, 3px); box-shadow: none; }
+        .btn-start { background-color: var(--button-bg); }
+        .btn-edit { background-color: var(--tertiary-color); color: var(--headline-color); }
+
+        /* ── CHECKBOX KUIS ── */
+        .kuis-item { position: relative; }
+        .kuis-checkbox {
+            width: 20px; height: 20px;
+            cursor: pointer; flex-shrink: 0;
+            accent-color: var(--button-bg);
+            margin-right: 2px;
+        }
+
+        /* ── MERGE BAR ── */
+        .merge-bar {
+            position: fixed;
+            bottom: 24px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--headline-color);
+            color: white;
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            padding: 14px 22px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 6px 6px 0 var(--stroke-color);
+            z-index: 100;
+            white-space: nowrap;
+            animation: slideUp 0.25s ease-out;
+        }
+        .merge-bar.show { display: flex; }
+        @keyframes slideUp { from{transform:translateX(-50%) translateY(20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+        .merge-bar-info { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.7); }
+        .merge-bar-info span { color: var(--button-bg); font-size: 16px; }
+        .btn-merge {
+            background: var(--button-bg); color: var(--headline-color);
+            border: 2px solid var(--stroke-color); border-radius: 10px;
+            padding: 10px 20px; font-size: 14px; font-weight: 900;
+            cursor: pointer; box-shadow: 3px 3px 0 var(--stroke-color);
+            transition: all 0.1s;
+        }
+        .btn-merge:active { transform: translate(3px,3px); box-shadow: none; }
+        .btn-cancel-merge {
+            background: transparent; color: rgba(255,255,255,0.45);
+            border: none; font-size: 13px; font-weight: 700;
+            cursor: pointer; padding: 4px 8px;
+        }
+        .btn-cancel-merge:hover { color: white; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 56px 20px;
+            background: var(--bg-color);
+            border: 3px dashed var(--stroke-color);
+            border-radius: 16px;
+        }
+        .empty-state .icon { margin-bottom: 16px; }
+        .empty-state p { font-size: 16px; color: var(--paragraph-color); }
+
+        .loading-text { text-align: center; padding: 30px; color: var(--paragraph-color); font-style: italic; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(39, 35, 67, 0.6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            padding: 36px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 10px 10px 0px var(--stroke-color);
+        }
+        .modal .emoji { font-size: 50px; margin-bottom: 12px; }
+        .modal h3 { font-size: 22px; color: var(--headline-color); margin-bottom: 10px; }
+        .modal p { margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-actions .btn { width: auto; padding: 10px 24px; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            header { padding: 12px 16px; }
+            .header-brand .brand-name { font-size: 17px; }
+            .header-brand .divider, .header-brand .page-label { display: none; }
+            .btn-logout { padding: 7px 14px; font-size: 13px; }
+            .welcome-banner { padding: 22px 16px; }
+            .welcome-inner { flex-direction: column-reverse; align-items: flex-start; gap: 14px; }
+            .welcome-text h2 { font-size: 26px; }
+            .welcome-text p { font-size: 14px; }
+            .section-wrap { padding: 22px 16px; }
+            .actions-grid { grid-template-columns: 1fr; gap: 14px; }
+            .action-card { padding: 22px 18px; }
+            .action-card h4 { font-size: 17px; }
+            .kuis-item { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px 16px; }
+            .kuis-info h4 { font-size: 15px; }
+            .kuis-actions { width: 100%; display: flex; gap: 8px; }
+            .btn-sm { flex: 1; text-align: center; justify-content: center; font-size: 12px; padding: 8px 8px; }
+            .merge-bar {
+                white-space: normal;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+                padding: 14px 16px;
+                border-radius: 14px;
+                width: calc(100% - 32px);
+                bottom: 16px;
+                left: 16px;
+                transform: none;
+            }
+            @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+            .merge-bar-info { font-size: 13px; }
+            .btn-merge { width: 100%; padding: 10px 16px; }
+            .modal { padding: 24px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-brand">
+        <span class="brand-name">PlaywithME</span>
+        <span class="divider">/</span>
+        <span class="page-label">Dashboard Guru</span>
+    </div>
+    <button class="btn-logout" id="logoutBtn">Keluar</button>
+</header>
+
+<!-- WELCOME BANNER -->
+<div class="welcome-banner">
+    <div class="welcome-inner">
+        <div class="welcome-text">
+            <p class="overline">Selamat datang kembali</p>
+            <h2>Halo, <span id="guruName">Guru</span>!</h2>
+            <p>Apa yang ingin kamu buat hari ini?</p>
+        </div>
+        <lottie-player
+            src="hello.json"
+            background="transparent"
+            speed="1"
+            style="width: 130px; height: 130px; flex-shrink: 0;"
+            loop
+            autoplay>
+        </lottie-player>
+    </div>
+</div>
+
+<!-- AKSI CEPAT -->
+<div class="section-wrap teal">
+    <div class="section-inner">
+        <div class="section-title">Aksi Cepat</div>
+        <div class="actions-grid">
+            <div class="action-card primary">
+                <div style="margin-bottom: 4px;">
+                    <lottie-player src="making.json" background="transparent" speed="1" style="width: 80px; height: 80px;" loop autoplay></lottie-player>
+                </div>
+                <h4>Buat Kuis Baru</h4>
+                <p>Rancang pertanyaan dan susunan kata acak untuk dimainkan siswa.</p>
+                <button class="btn" onclick="window.location.href='buat-kuis.html'">Buat Kuis Sekarang</button>
+            </div>
+            <div class="action-card">
+                <div style="margin-bottom: 4px;">
+                    <lottie-player src="statistics.json" background="transparent" speed="1" style="width: 80px; height: 80px;" loop autoplay></lottie-player>
+                </div>
+                <h4>Statistik Kelas</h4>
+                <p>Lihat rekap hasil permainan dan progres belajar siswa Anda.</p>
+                <button class="btn btn-outline" onclick="alert('Fitur statistik akan segera hadir!')">Lihat Statistik</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KOLEKSI KUIS -->
+<div class="section-wrap white">
+    <div class="section-inner">
+        <div class="section-title">
+            <lottie-player src="quiz-list.json" background="transparent" speed="1" style="width: 48px; height: 48px;" loop autoplay></lottie-player>
+            Koleksi Kuis Saya
+        </div>
+        <div id="kuisList" class="kuis-list">
+            <div class="loading-text" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                <lottie-player src="hourglass.json" background="transparent" speed="1" style="width: 28px; height: 28px;" loop autoplay></lottie-player>
+                Memuat kuis...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MERGE BAR -->
+<div class="merge-bar" id="mergeBar">
+    <div class="merge-bar-info"><span id="mergeCount">0</span> kuis dipilih</div>
+    <button class="btn-merge" onclick="gabungkanKuis()">🔗 Gabungkan Soal</button>
+    <button class="btn-cancel-merge" onclick="batalPilihan()">✕ Batal</button>
+</div>
+
+<!-- MODAL KONFIRMASI HAPUS -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+        <div class="emoji">🗑️</div>
+        <h3>Hapus Kuis?</h3>
+        <p>Kuis "<span id="deleteTitle"></span>" akan dihapus permanen dan tidak bisa dikembalikan.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeDeleteModal()">Batal</button>
+            <button class="btn btn-hapus" id="confirmDeleteBtn">Ya, Hapus!</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { collection, query, where, getDocs, getDoc, doc, deleteDoc, addDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    let currentUser = null;
+    const selectedKuisIds = new Set();
+
+    function updateMergeBar() {
+        const bar = document.getElementById('mergeBar');
+        document.getElementById('mergeCount').textContent = selectedKuisIds.size;
+        if (selectedKuisIds.size >= 2) bar.classList.add('show');
+        else bar.classList.remove('show');
+    }
+
+    window.batalPilihan = function() {
+        selectedKuisIds.clear();
+        document.querySelectorAll('.kuis-checkbox').forEach(cb => cb.checked = false);
+        updateMergeBar();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login-guru.html';
+            return;
+        }
+        currentUser = user;
+        // Tampilkan nama email sebagai sapaan
+        const namaEmail = user.email.split('@')[0];
+        document.getElementById('guruName').textContent = namaEmail.charAt(0).toUpperCase() + namaEmail.slice(1);
+        await muatKuis();
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await signOut(auth);
+        window.location.href = 'index.html';
+    });
+
+    // ===== MUAT DAFTAR KUIS =====
+    async function muatKuis() {
+        const listEl = document.getElementById('kuisList');
+        try {
+            const q = query(collection(db, "kuis"), where("guru_uid", "==", currentUser.uid));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon"><lottie-player src="inventory.json" background="transparent" speed="1" style="width: 120px; height: 120px; margin: 0 auto;" loop autoplay></lottie-player></div>
+                        <p>Belum ada kuis. Klik "Buat Kuis Sekarang" untuk mulai!</p>
+                    </div>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const item = document.createElement('div');
+                item.className = 'kuis-item';
+                const safeId    = docSnap.id;
+                const safeJudul = data.judul.replace(/'/g, "\\'");
+                item.innerHTML = `
+                    <input type="checkbox" class="kuis-checkbox" data-id="${safeId}" title="Pilih untuk digabung">
+                    <div class="kuis-info">
+                        <h4>${data.judul}</h4>
+                        <div class="kuis-meta">
+                            <span class="badge badge-mapel">📖 ${data.mata_pelajaran}</span>
+                            <span class="badge badge-soal">📝 ${data.jumlah_soal} soal</span>
+                        </div>
+                    </div>
+                    <div class="kuis-actions">
+                        <button class="btn-sm btn-start" onclick="mulaiGame('${safeId}', '${safeJudul}')"><lottie-player src="start.json" background="transparent" speed="1" style="width: 20px; height: 20px;" loop autoplay></lottie-player> Mulai Game</button>
+                        <button class="btn-sm btn-edit" onclick="editKuis('${safeId}')"><lottie-player src="edit.json" background="transparent" speed="1" style="width: 20px; height: 20px;" loop autoplay></lottie-player> Edit</button>
+                        <button class="btn-sm btn-hapus" onclick="konfirmasiHapus('${safeId}', '${safeJudul}')">🗑</button>
+                    </div>
+                `;
+                // Pasang event listener checkbox setelah innerHTML di-set
+                item.querySelector('.kuis-checkbox').addEventListener('change', function() {
+                    if (this.checked) selectedKuisIds.add(safeId);
+                    else selectedKuisIds.delete(safeId);
+                    updateMergeBar();
+                });
+                listEl.appendChild(item);
+            });
+        } catch (err) {
+            listEl.innerHTML = '<div class="loading-text">❌ Gagal memuat kuis. Cek koneksi internet Anda.</div>';
+            console.error(err);
+        }
+    }
+
+    // ===== GABUNGKAN KUIS =====
+    window.gabungkanKuis = async function() {
+        if (selectedKuisIds.size < 2) return;
+        const ids = [...selectedKuisIds];
+        const btn = document.querySelector('.btn-merge');
+        btn.textContent = '⏳ Menggabungkan...';
+        btn.disabled = true;
+
+        try {
+            const soalGabungan = [];
+            const judulList = [];
+            const mapelSet = new Set();
+
+            for (const id of ids) {
+                const snap = await getDoc(doc(db, "kuis", id));
+                if (!snap.exists()) continue;
+                const d = snap.data();
+                judulList.push(d.judul);
+                mapelSet.add(d.mata_pelajaran);
+                d.soal.forEach(soal => {
+                    soalGabungan.push({ ...soal, urutan: soalGabungan.length + 1 });
+                });
+            }
+
+            const mapelArr = [...mapelSet];
+            await addDoc(collection(db, "kuis"), {
+                judul: `Gabungan: ${judulList.join(' + ')}`,
+                mata_pelajaran: mapelArr.length === 1 ? mapelArr[0] : 'Gabungan',
+                soal: soalGabungan,
+                guru_uid: currentUser.uid,
+                dibuat_pada: serverTimestamp(),
+                jumlah_soal: soalGabungan.length
+            });
+
+            batalPilihan();
+            await muatKuis();
+            alert(`✅ Berhasil menggabungkan ${ids.length} kuis menjadi 1 kuis baru (${soalGabungan.length} soal)!`);
+        } catch (err) {
+            alert('Gagal menggabungkan: ' + err.message);
+        } finally {
+            btn.textContent = '🔗 Gabungkan Soal';
+            btn.disabled = false;
+        }
+    };
+
+    // ===== EDIT KUIS =====
+    window.editKuis = function(id) {
+        window.location.href = `buat-kuis.html?id=${id}`;
+    };
+
+    // ===== MULAI GAME: Generate PIN & Buat Sesi di Firestore =====
+    window.mulaiGame = async function(kuisId, judulKuis) {
+        try {
+            // Generate PIN 6 digit unik
+            const pin = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Simpan sesi ke Firestore
+            const sesiRef = doc(db, "sesi", pin);
+            await setDoc(sesiRef, {
+                pin: pin,
+                kuis_id: kuisId,
+                judul_kuis: judulKuis,
+                guru_uid: currentUser.uid,
+                status: "menunggu",   // menunggu | berlangsung | selesai
+                dibuat_pada: serverTimestamp(),
+                siswa: []
+            });
+
+            // Redirect ke lobby guru dengan PIN
+            window.location.href = `lobby-guru.html?pin=${pin}&kuis=${kuisId}`;
+        } catch (err) {
+            alert("Gagal membuat sesi game: " + err.message);
+            console.error(err);
+        }
+    };
+
+    // ===== HAPUS KUIS =====
+    let deleteTargetId = null;
+
+    window.konfirmasiHapus = function(id, judul) {
+        deleteTargetId = id;
+        document.getElementById('deleteTitle').textContent = judul;
+        document.getElementById('deleteModal').classList.add('active');
+    };
+
+    window.closeDeleteModal = function() {
+        document.getElementById('deleteModal').classList.remove('active');
+        deleteTargetId = null;
+    };
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (!deleteTargetId) return;
+        try {
+            await deleteDoc(doc(db, "kuis", deleteTargetId));
+            closeDeleteModal();
+            await muatKuis();
+        } catch (err) {
+            alert("Gagal menghapus: " + err.message);
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Menunggu Game... </title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe; --headline-color: #272343; --paragraph-color: #2d334a;
+            --button-bg: #ffd803; --stroke-color: #272343;
+            --secondary-color: #e3f6f5; --tertiary-color: #bae8e8;
+            --danger-color: #ff8906;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: var(--tertiary-color);
+            background-image: radial-gradient(circle, rgba(39,35,67,0.06) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--paragraph-color);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .waiting-box {
+            background-color: var(--bg-color); border: 3px solid var(--stroke-color);
+            border-radius: 20px; padding: 40px 30px; text-align: center;
+            box-shadow: 10px 10px 0px var(--stroke-color); max-width: 440px; width: 100%;
+        }
+        .avatar-display {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            background-color: var(--button-bg); border: 4px solid var(--stroke-color);
+            border-radius: 50%; width: 120px; height: 120px;
+            box-shadow: 6px 6px 0px var(--stroke-color);
+            animation: bounce 2s infinite;
+            overflow: hidden;
+        }
+        .waiting-box h2 { font-size: 24px; color: var(--headline-color); margin: 16px 0 8px; font-weight: 900; }
+        .waiting-box .subtitle { font-size: 14px; margin-bottom: 20px; line-height: 1.5; color: var(--paragraph-color); }
+        .pin-badge {
+            display: inline-block; background: var(--secondary-color);
+            border: 3px solid var(--stroke-color); border-radius: 12px;
+            padding: 8px 24px; font-size: 26px; font-weight: 900; letter-spacing: 8px;
+            margin-bottom: 20px; box-shadow: 4px 4px 0px var(--stroke-color);
+        }
+        .loading-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 8px; }
+        .dot {
+            width: 16px; height: 16px; background-color: var(--headline-color);
+            border-radius: 50%; animation: pulse 1.5s infinite ease-in-out;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        .status-text { font-size: 12px; color: var(--paragraph-color); margin-bottom: 20px; opacity: 0.6; font-style: italic; }
+
+        /* Tombol keluar */
+        .btn-keluar {
+            background: var(--bg-color);
+            color: var(--paragraph-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+            transition: all 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .btn-keluar:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--stroke-color); }
+        .btn-keluar:active { transform: translate(4px,4px); box-shadow: none; }
+
+        /* Divider */
+        .divider { border: none; border-top: 3px solid var(--stroke-color); margin: 4px 0 20px; }
+
+        .friends-section h4 { font-size: 13px; font-weight: 700; color: var(--paragraph-color); margin-bottom: 12px; }
+        .friends-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .friend-chip {
+            background: var(--tertiary-color); border: 2px solid var(--stroke-color);
+            border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700;
+            animation: popIn 0.3s ease-out;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+
+        /* Overlay kicked */
+        .kicked-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(39,35,67,0.85); z-index: 600;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .kicked-overlay.active { display: flex; }
+        .kicked-box {
+            background: var(--bg-color); border: 3px solid var(--stroke-color);
+            border-radius: 20px; padding: 40px; max-width: 360px; width: 100%;
+            box-shadow: 10px 10px 0 var(--stroke-color);
+        }
+        .kicked-box .kicked-icon { font-size: 56px; margin-bottom: 14px; }
+        .kicked-box h3 { font-size: 22px; font-weight: 900; color: var(--headline-color); margin-bottom: 10px; }
+        .kicked-box p { font-size: 14px; color: var(--paragraph-color); margin-bottom: 24px; line-height: 1.5; }
+        .btn-rejoin {
+            background: var(--button-bg); color: var(--headline-color);
+            border: 3px solid var(--stroke-color); border-radius: 12px;
+            padding: 12px 28px; font-size: 15px; font-weight: 900;
+            cursor: pointer; box-shadow: 4px 4px 0 var(--stroke-color); transition: all 0.1s;
+        }
+        .btn-rejoin:active { transform: translate(4px,4px); box-shadow: none; }
+
+        /* Start overlay */
+        .start-overlay {
+            display: none; position: fixed; inset: 0;
+            background: var(--button-bg); z-index: 500;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .start-overlay.active { display: flex; }
+        .start-overlay p { font-size: 24px; font-weight: 700; color: var(--headline-color); margin-top: 8px; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes pulse { 0%, 100% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } to { transform: scale(1); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 640px) {
+            body { padding: 14px; align-items: flex-start; padding-top: 24px; }
+            .waiting-box { padding: 28px 20px; border-radius: 18px; box-shadow: 5px 5px 0px var(--stroke-color); }
+            .avatar-display { width: 96px; height: 96px; }
+            .waiting-box h2 { font-size: 20px; margin: 14px 0 6px; }
+            .waiting-box .subtitle { font-size: 13px; margin-bottom: 16px; }
+            .pin-badge { font-size: 22px; letter-spacing: 6px; padding: 7px 18px; margin-bottom: 16px; }
+            .friends-section h4 { font-size: 12px; }
+            .friend-chip { font-size: 12px; padding: 5px 12px; }
+            .btn-keluar { font-size: 13px; padding: 9px 18px; margin-bottom: 16px; }
+            .kicked-box { padding: 28px 20px; }
+            .kicked-box h3 { font-size: 20px; }
+            .start-overlay p { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="waiting-box">
+    <div class="avatar-display" id="avatarDisplay">🐶</div>
+    <h2>Berhasil masuk, <span id="namaSiswa">Budi</span>!</h2>
+    <p class="subtitle">Lihat namamu di layar guru.<br>Game akan dimulai segera...</p>
+    <div class="pin-badge" id="pinDisplay">------</div>
+    <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    <div class="status-text" id="statusText">Terhubung ke server...</div>
+
+    <button class="btn-keluar" onclick="keluarLobby()">
+        ← Keluar dari Lobby
+    </button>
+
+    <hr class="divider">
+
+    <div class="friends-section">
+        <h4>🧑‍🤝‍🧑 Teman yang sudah bergabung:</h4>
+        <div class="friends-list" id="friendsList"></div>
+    </div>
+</div>
+
+<!-- Overlay: Dikeluarkan guru -->
+<div class="kicked-overlay" id="kickedOverlay">
+    <div class="kicked-box">
+        <div class="kicked-icon">🚪</div>
+        <h3>Kamu Dikeluarkan</h3>
+        <p>Guru telah mengeluarkanmu dari lobby. Kamu bisa masuk lagi menggunakan PIN yang sama.</p>
+        <button class="btn-rejoin" onclick="window.location.href='login-siswa.html?pin=' + pinState">
+            Masuk Lagi
+        </button>
+    </div>
+</div>
+
+<!-- Overlay: Game dimulai -->
+<div class="start-overlay" id="startOverlay">
+    <lottie-player src="rocket.json" background="transparent" speed="1"
+        style="width: 140px; height: 140px;" loop autoplay>
+    </lottie-player>
+    <p>Game Dimulai!</p>
+</div>
+
+<script type="module">
+    import { db } from "./firebase-config.js";
+    import { doc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // Ambil data dari URL atau sessionStorage
+    const urlParams   = new URLSearchParams(window.location.search);
+    const pinState    = urlParams.get('pin')    || sessionStorage.getItem('pin_siswa')    || '';
+    const namaState   = urlParams.get('nama')
+                        ? decodeURIComponent(urlParams.get('nama'))
+                        : (sessionStorage.getItem('nama_siswa') || 'Siswa');
+    const avatarState = urlParams.get('avatar')
+                        ? decodeURIComponent(urlParams.get('avatar'))
+                        : (sessionStorage.getItem('avatar_siswa') || '🐶');
+
+    // Simpan ke sessionStorage
+    sessionStorage.setItem('pin_siswa',    pinState);
+    sessionStorage.setItem('nama_siswa',   namaState);
+    sessionStorage.setItem('avatar_siswa', avatarState);
+
+    document.getElementById('namaSiswa').textContent  = namaState;
+    document.getElementById('avatarDisplay').innerHTML =
+        `<lottie-player src="${avatarState}" background="transparent" speed="1" style="width:90px;height:90px;" loop autoplay></lottie-player>`;
+    document.getElementById('pinDisplay').textContent  = pinState;
+
+    // Expose pinState for kicked overlay button
+    window.pinState = pinState;
+
+    if (!pinState) {
+        alert('Sesi tidak valid. Kembali ke halaman login.');
+        window.location.href = 'login-siswa.html';
+    }
+
+    const sesiRef = doc(db, "sesi", pinState);
+    let sudahRedirect = false;
+    let sudahKeluar   = false;
+    let didJoin       = false; // true setelah kita terdeteksi di array siswa
+
+    // ===== KELUAR LOBBY (tombol atau otomatis) =====
+    window.keluarLobby = async function() {
+        if (sudahKeluar || sudahRedirect) return;
+        sudahKeluar = true;
+        unsubscribe();
+        clearInterval(pollingInterval);
+        try {
+            const snap = await getDoc(sesiRef);
+            if (snap.exists()) {
+                const siswaLama = snap.data().siswa || [];
+                const siswaBaru = siswaLama.filter(s => s.nama !== namaState);
+                await updateDoc(sesiRef, { siswa: siswaBaru });
+            }
+        } catch(e) {
+            console.warn('[Lobby Siswa] Keluar error:', e.message);
+        }
+        // Kembali ke login dengan PIN terisi
+        window.location.href = `login-siswa.html?pin=${pinState}`;
+    };
+
+    // Coba bersihkan data saat tab/halaman ditutup (best-effort)
+    window.addEventListener('beforeunload', () => {
+        if (sudahKeluar || sudahRedirect) return;
+        // Coba sinkronkan — tidak selalu berhasil saat tab ditutup paksa
+        // tapi berhasil untuk navigasi back/refresh
+        sudahKeluar = true;
+        const snap_promise = getDoc(sesiRef).then(snap => {
+            if (snap.exists()) {
+                const siswaBaru = (snap.data().siswa || []).filter(s => s.nama !== namaState);
+                return updateDoc(sesiRef, { siswa: siswaBaru });
+            }
+        }).catch(() => {});
+    });
+
+    // ===== PROSES DATA SNAPSHOT =====
+    function prosesData(data) {
+        if (!data) return;
+
+        document.getElementById('statusText').textContent = 'Terhubung ✓  |  Menunggu guru memulai...';
+
+        const siswa = data.siswa || [];
+
+        // Cek apakah siswa ini masih ada di daftar
+        const masihAda = siswa.some(s => s.nama === namaState);
+        if (masihAda) {
+            didJoin = true;
+        } else if (didJoin && !sudahRedirect && !sudahKeluar) {
+            // Dikeluarkan oleh guru
+            sudahKeluar = true;
+            unsubscribe();
+            clearInterval(pollingInterval);
+            document.getElementById('kickedOverlay').classList.add('active');
+            return;
+        }
+
+        // Tampilkan teman yang sudah bergabung
+        const friendsList = document.getElementById('friendsList');
+        friendsList.innerHTML = '';
+        siswa.forEach(s => {
+            if (s.nama !== namaState) {
+                const chip = document.createElement('div');
+                chip.className = 'friend-chip';
+                chip.innerHTML = `<lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:22px;height:22px;flex-shrink:0;" loop autoplay></lottie-player>${s.nama}`;
+                friendsList.appendChild(chip);
+            }
+        });
+
+        if (data.status === 'berlangsung') {
+            doRedirect();
+        }
+        if (data.status === 'ditutup') {
+            if (!sudahRedirect && !sudahKeluar) {
+                sudahRedirect = true;
+                alert('Ruangan telah ditutup oleh guru.');
+                window.location.href = 'index.html';
+            }
+        }
+    }
+
+    function doRedirect() {
+        if (sudahRedirect) return;
+        sudahRedirect = true;
+        document.getElementById('startOverlay').classList.add('active');
+        setTimeout(() => {
+            window.location.href =
+                `game-siswa.html?pin=${pinState}` +
+                `&nama=${encodeURIComponent(namaState)}` +
+                `&avatar=${encodeURIComponent(avatarState)}`;
+        }, 1500);
+    }
+
+    // ===== LISTENER REAL-TIME =====
+    const unsubscribe = onSnapshot(
+        sesiRef,
+        (snap) => {
+            if (snap.exists()) {
+                prosesData(snap.data());
+            } else {
+                console.warn('[Lobby Siswa] Dokumen sesi belum ada, menunggu...');
+                document.getElementById('statusText').textContent = 'Menunggu koneksi sesi...';
+            }
+        },
+        (error) => {
+            console.error('[Lobby Siswa] onSnapshot error:', error.code, error.message);
+            document.getElementById('statusText').textContent = 'Error: ' + error.code;
+        }
+    );
+
+    // ===== POLLING FALLBACK (jaga-jaga jika onSnapshot terlambat) =====
+    const pollingInterval = setInterval(async () => {
+        if (sudahRedirect || sudahKeluar) {
+            clearInterval(pollingInterval);
+            return;
+        }
+        try {
+            const snap = await getDoc(sesiRef);
+            if (snap.exists() && snap.data().status === 'berlangsung') {
+                clearInterval(pollingInterval);
+                unsubscribe();
+                doRedirect();
+            }
+        } catch(e) {
+            console.warn('[Lobby Siswa] Polling error:', e.message);
+        }
+    }, 3000);
+
+</script>
+
+</body>
+</html>

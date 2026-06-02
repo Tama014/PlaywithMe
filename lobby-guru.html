@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Ruang Tunggu Guru</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe;
+            --headline-color: #272343;
+            --paragraph-color: #2d334a;
+            --button-bg: #ffd803;
+            --button-text: #272343;
+            --stroke-color: #272343;
+            --secondary-color: #e3f6f5;
+            --tertiary-color: #bae8e8;
+            --danger-color: #ff8906;
+            --page-bg: #edf7f7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--page-bg);
+            background-image: radial-gradient(circle, #c4e8e8 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--paragraph-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            padding: 12px 40px;
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 0 var(--stroke-color);
+        }
+
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-brand .brand-name { font-size: 20px; font-weight: 900; color: var(--headline-color); }
+        .header-brand .divider { color: var(--stroke-color); opacity: 0.35; font-size: 18px; }
+        .header-brand .page-label { font-size: 15px; font-weight: 600; color: var(--paragraph-color); }
+
+        .btn-cancel {
+            background-color: var(--danger-color);
+            color: white;
+            border: 3px solid var(--stroke-color);
+            padding: 9px 18px;
+            font-weight: 800;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            transition: all 0.1s;
+        }
+        .btn-cancel:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0px var(--stroke-color); }
+        .btn-cancel:active { transform: translate(4px, 4px); box-shadow: none; }
+
+        /* ===== MAIN LAYOUT ===== */
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 32px 40px;
+            gap: 28px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        /* ===== LEFT PANEL ===== */
+        .info-panel {
+            width: 340px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* PIN Card */
+        .pin-card {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 8px 8px 0px var(--stroke-color);
+        }
+
+        .pin-card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--tertiary-color) 100%);
+            border-bottom: 3px solid var(--stroke-color);
+            padding: 16px 20px;
+            text-align: center;
+        }
+        .pin-card-header .instruction {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--paragraph-color);
+            opacity: 0.7;
+        }
+        .pin-card-header .site-name {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--headline-color);
+            margin-top: 2px;
+        }
+
+        .pin-card-body {
+            padding: 28px 20px;
+            text-align: center;
+        }
+
+        .pin-number {
+            font-size: 66px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: var(--headline-color);
+            text-shadow: 5px 5px 0px var(--button-bg);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .pin-sublabel {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--paragraph-color);
+            opacity: 0.5;
+            margin-bottom: 22px;
+        }
+
+        .qr-wrapper {
+            background: white;
+            border: 3px solid var(--stroke-color);
+            border-radius: 14px;
+            padding: 14px;
+            display: inline-block;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+        #qrcode img, #qrcode canvas { display: block; }
+
+        .qr-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--paragraph-color);
+            opacity: 0.55;
+            margin-top: 14px;
+        }
+
+        /* Quiz Badge */
+        .quiz-title-badge {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--headline-color);
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+
+        /* Start Button */
+        .btn-start {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 3px solid var(--stroke-color);
+            padding: 18px 20px;
+            font-size: 19px;
+            font-weight: 900;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 8px 8px 0px var(--stroke-color);
+            transition: all 0.1s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-start:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 10px 10px 0px var(--stroke-color); }
+        .btn-start:active:not(:disabled) { transform: translate(8px, 8px); box-shadow: none; }
+        .btn-start:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: var(--secondary-color);
+            box-shadow: 4px 4px 0px var(--stroke-color);
+        }
+
+        /* ===== SHUFFLE TOGGLE ===== */
+        .shuffle-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+            margin-bottom: 12px;
+        }
+        .shuffle-toggle-row:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--stroke-color); }
+        .shuffle-toggle-row:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--stroke-color); }
+        .shuffle-toggle-row.active { background: #fffdf0; border-color: var(--button-bg); box-shadow: 4px 4px 0 var(--button-bg); }
+
+        .shuffle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            pointer-events: none;
+        }
+        .shuffle-icon { font-size: 26px; line-height: 1; }
+        .shuffle-title { font-weight: 900; font-size: 14px; color: var(--headline-color); }
+        .shuffle-desc { font-size: 11px; color: var(--paragraph-color); margin-top: 2px; font-weight: 500; opacity: 0.8; }
+
+        .toggle-btn {
+            width: 52px;
+            height: 28px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            background: var(--secondary-color);
+            position: relative;
+            flex-shrink: 0;
+            pointer-events: none;
+            transition: background 0.15s;
+            box-shadow: 2px 2px 0 var(--stroke-color);
+        }
+        .toggle-btn.on { background: var(--button-bg); }
+        .toggle-knob {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--stroke-color);
+            top: 3px;
+            left: 3px;
+            transition: left 0.15s;
+        }
+        .toggle-btn.on .toggle-knob { left: calc(100% - 19px); }
+
+        .shuffle-hint {
+            font-size: 11px;
+            color: var(--paragraph-color);
+            opacity: 0.65;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+        .shuffle-active-badge {
+            display: none;
+            font-size: 11px;
+            font-weight: 900;
+            background: var(--stroke-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+        .shuffle-toggle-row.active .shuffle-hint { display: none; }
+        .shuffle-toggle-row.active .shuffle-active-badge { display: inline-block; }
+
+        /* ===== RIGHT PANEL ===== */
+        .students-panel {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            box-shadow: 8px 8px 0px var(--stroke-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 480px;
+        }
+
+        .students-panel-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--tertiary-color) 100%);
+            border-bottom: 3px solid var(--stroke-color);
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .students-panel-header h2 {
+            font-size: 19px;
+            font-weight: 900;
+            color: var(--headline-color);
+        }
+
+        .student-count {
+            background-color: var(--button-bg);
+            border: 2px solid var(--stroke-color);
+            border-radius: 20px;
+            padding: 5px 16px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--headline-color);
+            box-shadow: 2px 2px 0 var(--stroke-color);
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .students-body {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 14px;
+        }
+
+        /* Student Card */
+        .student-card {
+            background-color: var(--tertiary-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 14px;
+            padding: 16px 10px;
+            text-align: center;
+            font-weight: 800;
+            box-shadow: 4px 4px 0px var(--stroke-color);
+            animation: popIn 0.3s ease-out;
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+        }
+        .student-card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--stroke-color); }
+        .student-avatar { margin-bottom: 6px; display: flex; align-items: center; justify-content: center; }
+        .student-name { font-size: 13px; word-break: break-word; color: var(--headline-color); }
+
+        /* Kick button */
+        .kick-btn {
+            position: absolute;
+            top: -8px; right: -8px;
+            width: 26px; height: 26px;
+            background: var(--danger-color);
+            border: 2px solid var(--stroke-color);
+            border-radius: 50%;
+            font-size: 13px; font-weight: 900; line-height: 1;
+            color: white;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 2px 2px 0 var(--stroke-color);
+            z-index: 2;
+            padding: 0;
+        }
+        .student-card:hover .kick-btn { opacity: 1; }
+        .kick-btn:hover { transform: scale(1.15); }
+        .kick-btn:active { transform: scale(0.9); }
+
+        /* Waiting Hint */
+        .waiting-hint {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--paragraph-color);
+            grid-column: 1 / -1;
+        }
+        .waiting-hint p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-top: 6px;
+        }
+
+        @keyframes popIn {
+            0%   { transform: scale(0); opacity: 0; }
+            80%  { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header { padding: 12px 16px; }
+            .header-brand .divider, .header-brand .page-label { display: none; }
+            .container { flex-direction: column; padding: 20px 16px; gap: 18px; }
+            .info-panel { width: 100%; }
+            .students-panel { min-height: 320px; }
+            .pin-number { font-size: 52px; letter-spacing: 6px; }
+            .students-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 12px 12px; gap: 14px; }
+            .pin-number { font-size: 40px; letter-spacing: 4px; text-shadow: 3px 3px 0 var(--button-bg); }
+            .pin-card-body { padding: 20px 14px; }
+            .qr-wrapper { display: block; max-width: 190px; margin: 0 auto; }
+            #qrcode canvas, #qrcode img { max-width: 100% !important; height: auto !important; width: 100% !important; }
+            .btn-start { font-size: 16px; padding: 14px 16px; box-shadow: 5px 5px 0 var(--stroke-color); }
+            .students-panel-header { padding: 14px 16px; }
+            .students-panel-header h2 { font-size: 16px; }
+            .students-body { padding: 14px; }
+            .students-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+            .student-card { padding: 12px 8px; border-radius: 12px; box-shadow: 3px 3px 0 var(--stroke-color); }
+            .student-name { font-size: 11px; }
+            .shuffle-toggle-row { padding: 12px 14px; margin-bottom: 10px; }
+            .shuffle-icon { font-size: 22px; }
+            .shuffle-desc { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-brand">
+        <span class="brand-name">PlaywithME</span>
+        <span class="divider">/</span>
+        <span class="page-label">Ruang Tunggu</span>
+    </div>
+    <button class="btn-cancel" onclick="tutupRuangan()">Tutup Ruangan</button>
+</header>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="info-panel">
+
+        <!-- PIN Card -->
+        <div class="pin-card">
+            <div class="pin-card-header">
+                <div class="instruction">Buka &amp; masukkan PIN di</div>
+                <div class="site-name">PlaywithME</div>
+            </div>
+            <div class="pin-card-body">
+                <div class="pin-number" id="pinDisplay">------</div>
+                <div class="pin-sublabel">PIN Sesi</div>
+                <div class="qr-wrapper">
+                    <div id="qrcode"></div>
+                </div>
+                <div class="qr-label">atau scan QR Code</div>
+            </div>
+        </div>
+
+        <!-- Quiz Badge -->
+        <div class="quiz-title-badge" id="quizTitleBadge">
+            <lottie-player src="quiz-list.json" background="transparent" speed="1"
+                style="width: 28px; height: 28px; flex-shrink: 0;" loop autoplay>
+            </lottie-player>
+            <span>Memuat kuis...</span>
+        </div>
+
+        <!-- Shuffle Toggle -->
+        <div class="shuffle-toggle-row" id="shuffleRow" onclick="toggleShuffle()">
+            <div class="shuffle-label">
+                <span class="shuffle-icon">🔀</span>
+                <div>
+                    <div class="shuffle-title">
+                        Acak Urutan Soal
+                        <span class="shuffle-active-badge">✓ AKTIF</span>
+                    </div>
+                    <div class="shuffle-desc">Setiap siswa mendapat urutan soal berbeda — cegah contek!</div>
+                    <p class="shuffle-hint">⚠️ Aktifkan sebelum klik Mulai Game</p>
+                </div>
+            </div>
+            <div class="toggle-btn" id="shuffleToggle">
+                <div class="toggle-knob"></div>
+            </div>
+        </div>
+
+        <!-- Start Button -->
+        <button class="btn-start" id="startBtn" onclick="mulaiGame()" disabled>
+            <lottie-player src="hourglass.json" background="transparent" speed="1"
+                style="width: 30px; height: 30px;" loop autoplay>
+            </lottie-player>
+            Menunggu Siswa...
+        </button>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="students-panel">
+        <div class="students-panel-header">
+            <h2>Siswa Bergabung</h2>
+            <span class="student-count" id="countDisplay">0</span>
+        </div>
+        <div class="students-body">
+            <div class="students-grid" id="studentsList">
+                <div class="waiting-hint" style="grid-column:1/-1;">
+                    <lottie-player src="wait-student.json" background="transparent" speed="1"
+                        style="width: 130px; height: 130px;" loop autoplay>
+                    </lottie-player>
+                    <p>Bagikan PIN kepada siswa.<br>Siswa akan masuk setelah memasukkan PIN!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { doc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const params = new URLSearchParams(window.location.search);
+    const pin    = params.get('pin');
+
+    if (!pin) {
+        alert('PIN tidak ditemukan. Kembali ke dashboard.');
+        window.location.href = 'dashboard-guru.html';
+    }
+
+    // Tampilkan PIN segera
+    document.getElementById('pinDisplay').textContent = pin;
+
+    // Generate QR Code segera (tidak butuh auth)
+    const qrUrl = `${window.location.origin}/login-siswa.html?pin=${pin}`;
+    new QRCode(document.getElementById("qrcode"), {
+        text: qrUrl,
+        width: 180,
+        height: 180,
+        colorDark: "#272343",
+        colorLight: "#ffffff",
+    });
+
+    const sesiRef = doc(db, "sesi", pin);
+    let unsubscribe = null;
+    let authReady = false;
+    let currentSiswa = [];
+
+    // ===== KELUARKAN SISWA (KICK) =====
+    window.keluarkanSiswa = async function(nama) {
+        if (!confirm(`Keluarkan "${nama}" dari lobby?`)) return;
+        try {
+            const siswaBaru = currentSiswa.filter(s => s.nama !== nama);
+            await updateDoc(sesiRef, { siswa: siswaBaru });
+        } catch (err) {
+            alert('Gagal mengeluarkan siswa: ' + err.message);
+        }
+    };
+
+    // ===== MULAI GAME =====
+    let shuffleEnabled = false;
+
+    window.toggleShuffle = function() {
+        shuffleEnabled = !shuffleEnabled;
+        document.getElementById('shuffleToggle').classList.toggle('on', shuffleEnabled);
+        document.getElementById('shuffleRow').classList.toggle('active', shuffleEnabled);
+    };
+
+    window.mulaiGame = async function() {
+        if (!authReady) {
+            alert('Autentikasi belum selesai, tunggu sebentar dan coba lagi.');
+            return;
+        }
+        const startBtn = document.getElementById('startBtn');
+        const originalHTML = startBtn.innerHTML;
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<lottie-player src="start-game-guru.json" background="transparent" speed="1" style="width: 30px; height: 30px;" loop autoplay></lottie-player> Memulai...';
+        try {
+            console.log('🎮 [Lobby Guru] Mengubah status ke berlangsung, PIN:', pin);
+            await updateDoc(sesiRef, { status: 'berlangsung', shuffle: shuffleEnabled });
+            console.log('✅ [Lobby Guru] Status berhasil diubah ke berlangsung!');
+        } catch (err) {
+            console.error('❌ [Lobby Guru] Gagal mulai game:', err.code, err.message);
+            alert('Gagal memulai game: ' + err.code + ' — ' + err.message);
+            startBtn.disabled = false;
+            startBtn.innerHTML = originalHTML;
+        }
+    };
+
+    // ===== TUTUP RUANGAN =====
+    window.tutupRuangan = async function() {
+        if (confirm('Yakin ingin menutup ruangan? Semua siswa akan dikeluarkan.')) {
+            try {
+                await updateDoc(sesiRef, { status: 'ditutup' });
+                await deleteDoc(sesiRef);
+            } catch(e) {
+                console.error('Tutup ruangan error:', e.message);
+            }
+            window.location.href = 'dashboard-guru.html';
+        }
+    };
+
+    // ===== TUNGGU AUTH, LALU PASANG LISTENER =====
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            console.warn('⚠️ [Lobby Guru] User tidak login, redirect ke login.');
+            alert('Sesi login habis. Silakan login kembali.');
+            window.location.href = 'login-guru.html';
+            return;
+        }
+
+        console.log('✅ [Lobby Guru] Auth OK, UID:', user.uid);
+        authReady = true;
+
+        if (unsubscribe) unsubscribe();
+        unsubscribe = onSnapshot(sesiRef,
+            (snap) => {
+                if (!snap.exists()) {
+                    console.warn('⚠️ [Lobby Guru] Dokumen sesi tidak ada untuk PIN:', pin);
+                    return;
+                }
+                const data = snap.data();
+                console.log('📡 [Lobby Guru] Snapshot:', data.status, '| Siswa:', (data.siswa||[]).length);
+
+                document.getElementById('quizTitleBadge').innerHTML =
+                    `<lottie-player src="quiz-list.json" background="transparent" speed="1" style="width: 28px; height: 28px; flex-shrink:0;" loop autoplay></lottie-player><span>${data.judul_kuis}</span>`;
+
+                const siswa    = data.siswa || [];
+                currentSiswa   = siswa;
+                const startBtn = document.getElementById('startBtn');
+                document.getElementById('countDisplay').textContent = siswa.length;
+
+                if (siswa.length === 0) {
+                    document.getElementById('studentsList').innerHTML = `
+                        <div class="waiting-hint" style="grid-column:1/-1;">
+                            <lottie-player src="wait-student.json" background="transparent" speed="1"
+                                style="width: 130px; height: 130px;" loop autoplay></lottie-player>
+                            <p>Bagikan PIN kepada siswa.<br>Mereka akan muncul di sini secara otomatis!</p>
+                        </div>`;
+                    startBtn.disabled = true;
+                    startBtn.innerHTML = `<lottie-player src="hourglass.json" background="transparent" speed="1" style="width: 30px; height: 30px;" loop autoplay></lottie-player> Menunggu Siswa...`;
+                } else {
+                    document.getElementById('studentsList').innerHTML = '';
+                    siswa.forEach(s => {
+                        const card = document.createElement('div');
+                        card.className = 'student-card';
+                        card.innerHTML = `
+                            <div class="student-avatar"><lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:50px;height:50px;" loop autoplay></lottie-player></div>
+                            <div class="student-name">${s.nama}</div>
+                            <button class="kick-btn" onclick="keluarkanSiswa('${s.nama.replace(/'/g, "\\'")}')" title="Keluarkan ${s.nama}">✕</button>
+                        `;
+                        document.getElementById('studentsList').appendChild(card);
+                    });
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = `<lottie-player src="start-game-guru.json" background="transparent" speed="1" style="width: 30px; height: 30px;" loop autoplay></lottie-player> MULAI GAME (${siswa.length} siswa)`;
+                }
+
+                if (data.status === 'berlangsung') {
+                    console.log('🚀 [Lobby Guru] Status berlangsung, redirect ke game-guru...');
+                    if (unsubscribe) unsubscribe();
+                    window.location.href = `game-guru.html?pin=${pin}`;
+                }
+            },
+            (error) => {
+                console.error('❌ [Lobby Guru] onSnapshot error:', error.code, error.message);
+                alert('Error Firebase Lobby Guru: ' + error.code + ' — ' + error.message);
+            }
+        );
+    });
+</script>
+
+</body>
+</html>

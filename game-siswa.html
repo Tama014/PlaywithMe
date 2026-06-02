@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Game</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe; --headline-color: #272343; --paragraph-color: #2d334a;
+            --button-bg: #ffd803; --stroke-color: #272343;
+            --secondary-color: #e3f6f5; --tertiary-color: #bae8e8;
+            --correct: #16a34a; --wrong: #dc2626;
+            --surface: rgba(255,255,255,0.06);
+            --surface-border: rgba(255,255,255,0.11);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--headline-color);
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar-outer {
+            height: 5px;
+            background: rgba(255,255,255,0.1);
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background: var(--button-bg);
+            border-radius: 0 3px 3px 0;
+            transition: width 0.5s ease;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            padding: 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            background: rgba(0,0,0,0.25);
+            border-bottom: 2px solid var(--surface-border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .soal-counter {
+            font-weight: 900;
+            font-size: 13px;
+            color: rgba(255,255,255,0.55);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .soal-counter span { color: var(--button-bg); font-size: 16px; }
+        .avatar-mini {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            width: 50px; height: 50px;
+            overflow: hidden;
+        }
+        .skor-box {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--button-bg);
+        }
+
+        /* ===== GAME AREA ===== */
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 22px 20px 140px;
+            max-width: 680px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 16px;
+        }
+
+        /* ===== QUESTION CARD ===== */
+        .question-box {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 20px;
+            padding: 22px 26px 26px;
+            box-shadow: 6px 6px 0 var(--stroke-color);
+            position: relative;
+            overflow: hidden;
+        }
+        .question-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--button-bg) 0%, var(--tertiary-color) 100%);
+            border-radius: 17px 17px 0 0;
+        }
+        .question-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .q-num-tag {
+            background: var(--button-bg);
+            color: var(--headline-color);
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 12px;
+            border-radius: 20px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .q-instruction {
+            font-size: 12px;
+            color: var(--paragraph-color);
+            opacity: 0.45;
+            font-weight: 600;
+        }
+        .question-box h2 {
+            font-size: 22px;
+            color: var(--headline-color);
+            line-height: 1.55;
+            font-weight: 800;
+        }
+
+        /* ===== SECTION LABELS ===== */
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 8px;
+        }
+
+        /* ===== ANSWER ZONE ===== */
+        .answer-zone {
+            width: 100%;
+            min-height: 68px;
+            border: 2px dashed rgba(255,255,255,0.22);
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+            background: rgba(255,255,255,0.04);
+            transition: all 0.25s ease;
+        }
+        .answer-zone.correct {
+            border: 3px solid #22c55e;
+            background: rgba(34,197,94,0.12);
+            border-style: solid;
+        }
+        .answer-zone.wrong {
+            border: 3px solid #ef4444;
+            background: rgba(239,68,68,0.12);
+            border-style: solid;
+        }
+        .answer-placeholder {
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.2);
+            font-size: 14px;
+            padding: 8px 0;
+            font-style: italic;
+        }
+
+        /* ===== WORD BANK ===== */
+        .word-bank {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* ===== CHIPS ===== */
+        .word-chip {
+            background: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--headline-color);
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+            transition: all 0.1s;
+            user-select: none;
+        }
+        .word-chip:hover { transform: translateY(-3px); box-shadow: 4px 7px 0 var(--stroke-color); }
+        .word-chip:active { transform: translate(4px,4px); box-shadow: none; }
+        .word-chip.selected {
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.2);
+            border: 2px dashed rgba(255,255,255,0.12);
+            box-shadow: none;
+            transform: none;
+            cursor: default;
+        }
+        .word-chip.in-answer {
+            background: var(--button-bg);
+            color: var(--headline-color);
+            border-color: var(--stroke-color);
+            box-shadow: 3px 3px 0 var(--stroke-color);
+        }
+        .word-chip.in-answer:hover { transform: translateY(-3px); box-shadow: 3px 6px 0 var(--stroke-color); }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-btn {
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 19px;
+            font-weight: 900;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 6px 6px 0 var(--stroke-color);
+            transition: all 0.1s;
+        }
+        .action-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 7px 7px 0 var(--stroke-color); }
+        .action-btn:active { transform: translate(6px,6px); box-shadow: none !important; }
+        .action-btn.check { background: var(--button-bg); color: var(--headline-color); }
+        .action-btn.check:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 6px 6px 0 var(--stroke-color);
+        }
+        .action-btn.next { background: #22c55e; color: white; }
+        .action-btn.skip {
+            background: transparent;
+            color: rgba(255,255,255,0.3);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+            padding: 10px;
+            box-shadow: none;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .action-btn.skip:hover:not(:disabled) {
+            color: rgba(255,255,255,0.55);
+            background: rgba(255,255,255,0.05);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== FEEDBACK BACKDROP ===== */
+        .feedback-backdrop {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 199;
+        }
+        .feedback-backdrop.show { display: block; }
+
+        /* ===== FEEDBACK POPUP ===== */
+        .feedback-bar {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            width: calc(100% - 40px);
+            max-width: 460px;
+            padding: 26px 26px 22px;
+            border: 3px solid var(--stroke-color);
+            border-radius: 22px;
+            box-shadow: 8px 8px 0 var(--stroke-color);
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .feedback-bar.show { display: flex; animation: popInFeedback 0.28s ease-out; }
+        @keyframes popInFeedback {
+            from { transform: translate(-50%, -50%) scale(0.82); opacity: 0; }
+            to   { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+        }
+        .feedback-bar.correct-bar { background: var(--correct); }
+        .feedback-bar.wrong-bar   { background: var(--wrong); }
+        .feedback-bar h3 { font-size: 18px; font-weight: 900; color: white; line-height: 1.3; display: flex; align-items: center; gap: 8px; }
+
+        /* ===== NAV SOAL ===== */
+        .nav-soal {
+            display: flex;
+            gap: 6px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            background: rgba(0,0,0,0.15);
+            border-bottom: 2px solid rgba(255,255,255,0.07);
+            scrollbar-width: none;
+        }
+        .nav-soal::-webkit-scrollbar { display: none; }
+        .nav-dot {
+            min-width: 32px; height: 32px;
+            border-radius: 8px;
+            font-size: 12px; font-weight: 900;
+            border: 2px solid;
+            background: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            padding: 0;
+        }
+        .nav-dot.unanswered { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); }
+        .nav-dot.unanswered:hover { border-color: rgba(255,255,255,0.45); color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+        .nav-dot.current { background: var(--button-bg); border-color: var(--stroke-color); color: var(--headline-color); cursor: default; }
+        .nav-dot.correct { background: rgba(34,197,94,0.15); border-color: #22c55e; color: #22c55e; cursor: default; }
+        .nav-dot.skipped { border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.28); }
+        .nav-dot.skipped:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.07); }
+        .feedback-bar p  { font-size: 14px; color: rgba(255,255,255,0.88); line-height: 1.5; }
+        .feedback-action-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: background 0.1s;
+            text-align: center;
+        }
+        .feedback-action-btn:hover  { background: rgba(255,255,255,0.3); }
+        .feedback-action-btn:active { background: rgba(255,255,255,0.15); }
+
+        /* ===== LAYAR SELESAI ===== */
+        .finish-screen {
+            display: none; position: fixed; inset: 0;
+            background: var(--button-bg); z-index: 600;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 30px;
+        }
+        .finish-screen.show { display: flex; }
+        .finish-screen .big-emoji { font-size: 80px; margin-bottom: 20px; animation: bounce 1s ease infinite; }
+        .finish-screen h1 { font-size: 42px; font-weight: 900; color: var(--headline-color); margin-bottom: 10px; }
+        .finish-screen p { font-size: 22px; color: var(--headline-color); margin-bottom: 30px; }
+        .score-display {
+            font-size: 80px; font-weight: 900; color: var(--headline-color);
+            background: var(--bg-color); border: 4px solid var(--stroke-color);
+            border-radius: 20px; padding: 20px 50px;
+            box-shadow: 8px 8px 0 var(--stroke-color); margin-bottom: 30px;
+        }
+        .finish-btn {
+            background: var(--headline-color); color: var(--bg-color);
+            border: 3px solid var(--stroke-color); border-radius: 14px;
+            padding: 16px 40px; font-size: 20px; font-weight: 900;
+            cursor: pointer; box-shadow: 6px 6px 0 var(--stroke-color);
+        }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+        /* ===== WINNER OVERLAY ===== */
+        .winner-overlay {
+            display: none; position: fixed; inset: 0;
+            background: var(--headline-color);
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(255,216,3,0.12) 0%, transparent 60%);
+            z-index: 700;
+            flex-direction: column; align-items: center; justify-content: flex-start;
+            overflow-y: auto; padding: 40px 20px; text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .winner-overlay.show { display: flex; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+        .winner-top { margin-bottom: 28px; }
+        .winner-top h1 { font-size: 38px; font-weight: 900; color: var(--button-bg); margin-top: 10px; margin-bottom: 6px; }
+        .winner-top p { font-size: 15px; color: rgba(255,255,255,0.5); }
+
+        .winner-podium {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 14px; margin-bottom: 32px;
+        }
+        .wp-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .wp-medal { font-size: 36px; line-height: 1; }
+        .wp-avatar { display: flex; align-items: center; justify-content: center; }
+        .wp-name { font-size: 14px; font-weight: 900; color: #fff; max-width: 110px; word-break: break-word; text-align: center; }
+        .wp-name.is-me { color: var(--button-bg); }
+        .wp-score { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 700; }
+        .wp-block { width: 90px; border-radius: 12px 12px 0 0; border: 3px solid rgba(255,255,255,0.25); }
+        .wp-block.wp-1 { background: var(--button-bg); height: 110px; }
+        .wp-block.wp-2 { background: var(--tertiary-color); height: 80px; }
+        .wp-block.wp-3 { background: var(--secondary-color); height: 60px; }
+
+        .my-rank-badge {
+            background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.18);
+            border-radius: 16px; padding: 18px 28px; margin-bottom: 28px; min-width: 260px;
+        }
+        .my-rank-badge .rank-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .my-rank-badge .rank-value { font-size: 32px; font-weight: 900; color: var(--button-bg); }
+        .my-rank-badge .rank-score { font-size: 16px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+        .winner-btn {
+            background: var(--button-bg); color: var(--headline-color);
+            border: 3px solid var(--stroke-color); border-radius: 14px;
+            padding: 16px 40px; font-size: 18px; font-weight: 900;
+            cursor: pointer; box-shadow: 6px 6px 0 var(--stroke-color); transition: all 0.1s;
+        }
+        .winner-btn:active { transform: translate(6px,6px); box-shadow: none; }
+
+        /* ===== SHAKE ===== */
+        @keyframes shake {
+            0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+            40%{transform:translateX(8px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(8px)}
+        }
+        .shake { animation: shake 0.4s ease; }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 640px) {
+            header { padding: 10px 14px; }
+            .avatar-mini { width: 40px; height: 40px; }
+            .skor-box { font-size: 15px; gap: 4px; }
+            .soal-counter span { font-size: 14px; }
+
+            .nav-soal { padding: 8px 12px; gap: 5px; }
+            .nav-dot { min-width: 28px; height: 28px; font-size: 11px; border-radius: 6px; }
+
+            .game-area { padding: 14px 14px 96px; gap: 12px; }
+            .question-box { padding: 16px 18px 18px; border-radius: 16px; box-shadow: 4px 4px 0 var(--stroke-color); }
+            .question-box h2 { font-size: 18px; line-height: 1.45; }
+
+            .answer-zone { min-height: 56px; padding: 10px 12px; border-radius: 14px; }
+            .word-chip { padding: 9px 14px; font-size: 15px; border-radius: 10px; box-shadow: 3px 3px 0 var(--stroke-color); }
+
+            .action-btn { font-size: 16px; padding: 14px; border-radius: 14px; box-shadow: 4px 4px 0 var(--stroke-color); }
+            .action-btn.skip { font-size: 12px; padding: 9px; }
+
+            .feedback-bar { padding: 20px 18px 18px; border-radius: 18px; }
+            .feedback-bar h3 { font-size: 16px; }
+            .feedback-bar p  { font-size: 13px; }
+            .feedback-action-btn { font-size: 15px; padding: 11px 16px; }
+
+            .finish-screen { padding: 24px 20px; }
+            .finish-screen .big-emoji { font-size: 60px; margin-bottom: 14px; }
+            .finish-screen h1 { font-size: 30px; }
+            .finish-screen p  { font-size: 17px; margin-bottom: 20px; }
+            .score-display { font-size: 58px; padding: 16px 32px; border-radius: 16px; box-shadow: 5px 5px 0 var(--stroke-color); margin-bottom: 20px; }
+            .finish-btn { font-size: 17px; padding: 13px 28px; }
+
+            .winner-overlay { padding: 24px 16px; }
+            .winner-top h1 { font-size: 26px; }
+            .winner-top p  { font-size: 13px; }
+            .wp-block { width: 70px; border-radius: 10px 10px 0 0; }
+            .wp-block.wp-1 { height: 88px; }
+            .wp-block.wp-2 { height: 64px; }
+            .wp-block.wp-3 { height: 48px; }
+            .wp-name { font-size: 12px; max-width: 80px; }
+            .wp-medal { font-size: 28px; }
+            .winner-podium { gap: 10px; margin-bottom: 24px; }
+            .my-rank-badge { min-width: auto; width: 100%; max-width: 320px; padding: 14px 20px; border-radius: 14px; margin-bottom: 20px; }
+            .my-rank-badge .rank-value { font-size: 26px; }
+            .winner-btn { font-size: 16px; padding: 13px 28px; }
+        }
+
+        @media (max-width: 390px) {
+            .question-box h2 { font-size: 16px; }
+            .word-chip { padding: 8px 11px; font-size: 14px; }
+            .nav-dot { min-width: 24px; height: 24px; font-size: 10px; }
+            .score-display { font-size: 48px; padding: 13px 24px; }
+            .finish-screen h1 { font-size: 26px; }
+            .wp-block { width: 60px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+</div>
+
+<!-- Header -->
+<header>
+    <div class="soal-counter">Soal <span id="soalNum">1</span> / <span id="soalTotal">?</span></div>
+    <div class="avatar-mini" id="avatarMini"></div>
+    <div class="skor-box">⭐ <span id="skorDisplay">0</span></div>
+</header>
+
+<!-- Navigasi Soal -->
+<nav class="nav-soal" id="navSoal"></nav>
+
+<!-- Game Area -->
+<div class="game-area">
+
+    <!-- Pertanyaan -->
+    <div class="question-box">
+        <div class="question-label">
+            <span class="q-num-tag" id="soalNumTag">Soal 1</span>
+            <span class="q-instruction">Susun kata menjadi kalimat yang benar</span>
+        </div>
+        <h2 id="questionText">Memuat soal...</h2>
+    </div>
+
+    <!-- Zona Susun Jawaban -->
+    <div>
+        <div class="section-label">Jawabanmu</div>
+        <div class="answer-zone" id="answerZone">
+            <div class="answer-placeholder" id="answerPlaceholder">Ketuk kata di bawah untuk menyusun jawaban...</div>
+        </div>
+    </div>
+
+    <!-- Bank Kata -->
+    <div>
+        <div class="section-label">Pilihan Kata</div>
+        <div class="word-bank" id="wordBank"></div>
+    </div>
+
+    <!-- Tombol Aksi -->
+    <button class="action-btn skip" onclick="lewati()">Lewati soal ini →</button>
+    <button class="action-btn check" id="checkBtn" onclick="periksa()" disabled>Periksa Jawaban</button>
+
+</div>
+
+<!-- Backdrop feedback -->
+<div class="feedback-backdrop" id="feedbackBackdrop"></div>
+
+<!-- Feedback Popup -->
+<div class="feedback-bar" id="feedbackBar">
+    <h3 id="feedbackTitle"></h3>
+    <p id="feedbackText"></p>
+    <button class="feedback-action-btn" id="feedbackActionBtn"></button>
+</div>
+
+<!-- Popup Pemenang -->
+<div class="winner-overlay" id="winnerOverlay">
+    <div class="winner-top">
+        <lottie-player src="confetti.json" background="transparent" speed="1"
+            style="width: 110px; height: 110px;" loop autoplay>
+        </lottie-player>
+        <h1>Game Berakhir!</h1>
+        <p id="winnerSubtitle">Ini dia juara kelas!</p>
+    </div>
+    <div class="winner-podium" id="winnerPodium"></div>
+    <div class="my-rank-badge" id="myRankBadge">
+        <div class="rank-label">Posisimu</div>
+        <div class="rank-value" id="myRankValue">—</div>
+        <div class="rank-score" id="myRankScore"></div>
+    </div>
+    <button class="winner-btn" onclick="window.location.href='index.html'">Kembali ke Menu</button>
+</div>
+
+<!-- Layar Selesai -->
+<div class="finish-screen" id="finishScreen">
+    <div class="big-emoji">🏆</div>
+    <h1>Selesai!</h1>
+    <p>Skor akhirmu:</p>
+    <div class="score-display" id="finalScore">0</div>
+    <button class="finish-btn" onclick="window.location.href='index.html'">Kembali ke Menu</button>
+</div>
+
+<script type="module">
+    import { db } from "./firebase-config.js";
+    import { doc, getDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // ===== STATE =====
+    let soalList = [];
+    let soalIndex = 0;
+    let skor = 0;
+    let selectedWords = [];
+    let wordChips = [];
+    let feedbackVisible = false;
+    let questionStates = []; // 'unanswered' | 'correct' | 'skipped'
+
+    // Render titik navigasi soal
+    function renderNavDots() {
+        const bar = document.getElementById('navSoal');
+        bar.innerHTML = '';
+        questionStates.forEach((state, i) => {
+            const dot = document.createElement('button');
+            const isCurrent = i === soalIndex;
+            dot.className = `nav-dot ${isCurrent ? 'current' : state}`;
+            dot.textContent = i + 1;
+            dot.title = `Soal ${i + 1}`;
+            const canNav = (state === 'unanswered' || state === 'skipped') && !isCurrent;
+            dot.disabled = !canNav;
+            if (canNav) dot.onclick = () => { soalIndex = i; tampilkanSoal(); };
+            bar.appendChild(dot);
+        });
+    }
+
+    // Cari soal berikutnya yang belum benar (unanswered atau skipped)
+    function getNextQuestion() {
+        // Cari ke depan dulu
+        for (let i = soalIndex + 1; i < soalList.length; i++) {
+            if (questionStates[i] !== 'correct') return i;
+        }
+        // Kalau tidak ada, cari dari awal
+        for (let i = 0; i < soalIndex; i++) {
+            if (questionStates[i] !== 'correct') return i;
+        }
+        return -1; // Semua sudah benar → selesai
+    }
+
+    // ===== AUDIO =====
+    const sfxCorrect = new Audio('correct.mp3');
+    sfxCorrect.currentTime = 2;
+
+    const sfxWrong = new Audio('fahh.mp3');
+
+    function playCorrect() {
+        sfxCorrect.currentTime = 2;
+        sfxCorrect.play().catch(() => {});
+    }
+    function playWrong() {
+        sfxWrong.currentTime = 0;
+        sfxWrong.play().catch(() => {});
+    }
+
+    // ── Ambil dari URL param (utama) ATAU sessionStorage (fallback)
+    const urlParams  = new URLSearchParams(window.location.search);
+    const pin    = urlParams.get('pin')    || sessionStorage.getItem('pin_siswa')    || '';
+    const nama   = urlParams.get('nama')   ? decodeURIComponent(urlParams.get('nama'))
+                                           : (sessionStorage.getItem('nama_siswa')  || 'Siswa');
+    const avatar = urlParams.get('avatar') ? decodeURIComponent(urlParams.get('avatar'))
+                                           : (sessionStorage.getItem('avatar_siswa') || 'dog.json');
+
+    if (pin)    sessionStorage.setItem('pin_siswa',    pin);
+    if (nama)   sessionStorage.setItem('nama_siswa',   nama);
+    if (avatar) sessionStorage.setItem('avatar_siswa', avatar);
+
+    document.getElementById('avatarMini').innerHTML =
+        `<lottie-player src="${avatar}" background="transparent" speed="1" style="width:42px;height:42px;" loop autoplay></lottie-player>`;
+
+    const sesiRef = pin ? doc(db, "sesi", pin) : null;
+
+    async function simpanSkorLive() {
+        if (!sesiRef) return;
+        try {
+            await updateDoc(sesiRef, { [`skor_live.${nama}`]: skor });
+        } catch(e) {
+            console.warn('[Game Siswa] Gagal simpan skor live:', e.message);
+        }
+    }
+
+    function fisherYatesShuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ===== MUAT SOAL =====
+    async function muatSoal() {
+        try {
+            const sesiSnap = await getDoc(doc(db, "sesi", pin));
+            if (!sesiSnap.exists()) { alert('Sesi tidak ditemukan.'); return; }
+            const sesiData = sesiSnap.data();
+
+            const kuisSnap = await getDoc(doc(db, "kuis", sesiData.kuis_id));
+            if (!kuisSnap.exists()) { alert('Kuis tidak ditemukan.'); return; }
+
+            soalList = kuisSnap.data().soal;
+            console.log('🔀 Shuffle mode:', sesiData.shuffle, '| Jumlah soal:', soalList.length);
+            if (sesiData.shuffle === true) {
+                soalList = fisherYatesShuffle(soalList);
+                console.log('✅ Soal berhasil diacak');
+            }
+            questionStates = new Array(soalList.length).fill('unanswered');
+            document.getElementById('soalTotal').textContent = soalList.length;
+            tampilkanSoal();
+        } catch (err) {
+            console.error(err);
+            alert('Gagal memuat soal: ' + err.message);
+        }
+    }
+
+    // ===== TAMPILKAN SOAL =====
+    function tampilkanSoal() {
+        const soal = soalList[soalIndex];
+        selectedWords = [];
+        feedbackVisible = false;
+
+        document.getElementById('soalNum').textContent = soalIndex + 1;
+        document.getElementById('soalNumTag').textContent = `Soal ${soalIndex + 1}`;
+        // Progress = jumlah soal benar
+        const correctCount = questionStates.filter(s => s === 'correct').length;
+        document.getElementById('progressBar').style.width = `${(correctCount / soalList.length) * 100}%`;
+        renderNavDots();
+        document.getElementById('checkBtn').disabled = true;
+        document.getElementById('checkBtn').textContent = 'Periksa Jawaban';
+        document.getElementById('checkBtn').className = 'action-btn check';
+        document.getElementById('checkBtn').onclick = periksa;
+        document.getElementById('questionText').textContent = soal.pertanyaan;
+
+        const answerZone = document.getElementById('answerZone');
+        answerZone.innerHTML = '<div class="answer-placeholder" id="answerPlaceholder">Ketuk kata di bawah untuk menyusun jawaban...</div>';
+        answerZone.className = 'answer-zone';
+
+        document.getElementById('feedbackBar').className = 'feedback-bar';
+        document.getElementById('feedbackBackdrop').classList.remove('show');
+
+        const kataJawaban = soal.kata_jawaban || soal.jawaban.split(' ').filter(k => k);
+        const kataAcak = [...kataJawaban].sort(() => Math.random() - 0.5);
+
+        const pengecoh = ['adalah', 'dari', 'dan', 'di', 'ke', 'juga', 'sudah', 'bukan', 'tetapi'];
+        const acakPengecoh = pengecoh.sort(() => Math.random() - 0.5).slice(0, Math.min(3, soalList.length));
+        const semuaKata = [...kataAcak, ...acakPengecoh].sort(() => Math.random() - 0.5);
+
+        const wordBank = document.getElementById('wordBank');
+        wordBank.innerHTML = '';
+        wordChips = [];
+
+        semuaKata.forEach((kata, i) => {
+            const chip = document.createElement('div');
+            chip.className = 'word-chip';
+            chip.textContent = kata;
+            chip.dataset.kata = kata;
+            chip.dataset.index = i;
+            chip.dataset.isPengecoh = !kataJawaban.includes(kata);
+            chip.addEventListener('click', () => pilihKata(chip));
+            wordBank.appendChild(chip);
+            wordChips.push(chip);
+        });
+    }
+
+    // ===== PILIH KATA =====
+    window.pilihKata = function(chip) {
+        if (chip.classList.contains('selected') || feedbackVisible) return;
+        const fb = document.getElementById('feedbackBar');
+        if (fb.classList.contains('wrong-bar')) fb.className = 'feedback-bar';
+
+        chip.classList.add('selected');
+        selectedWords.push({ kata: chip.dataset.kata, chipEl: chip });
+
+        const answerZone = document.getElementById('answerZone');
+        const placeholder = document.getElementById('answerPlaceholder');
+        if (placeholder) placeholder.remove();
+
+        const answerChip = document.createElement('div');
+        answerChip.className = 'word-chip in-answer';
+        answerChip.textContent = chip.dataset.kata;
+        answerChip.dataset.wordIndex = selectedWords.length - 1;
+        answerChip.addEventListener('click', () => hapusKataDariJawaban(answerChip, chip));
+        answerZone.appendChild(answerChip);
+
+        document.getElementById('checkBtn').disabled = false;
+    };
+
+    // ===== HAPUS KATA DARI JAWABAN =====
+    window.hapusKataDariJawaban = function(answerChip, sourceChip) {
+        if (feedbackVisible) return;
+        const fb = document.getElementById('feedbackBar');
+        if (fb.classList.contains('wrong-bar')) fb.className = 'feedback-bar';
+        answerChip.remove();
+        sourceChip.classList.remove('selected');
+        selectedWords = selectedWords.filter(w => w.chipEl !== sourceChip);
+
+        if (selectedWords.length === 0) {
+            const answerZone = document.getElementById('answerZone');
+            answerZone.innerHTML = '<div class="answer-placeholder" id="answerPlaceholder">Ketuk kata di bawah untuk menyusun jawaban...</div>';
+            document.getElementById('checkBtn').disabled = true;
+        }
+    };
+
+    window.clearLast = function() {};
+
+    // ===== PERIKSA JAWABAN =====
+    window.periksa = function() {
+        if (selectedWords.length === 0 || feedbackVisible) return;
+
+        const soal = soalList[soalIndex];
+        const jawabanSiswa = selectedWords.map(w => w.kata).join(' ').toLowerCase().trim();
+        const jawabanBenar = soal.jawaban.toLowerCase().trim();
+        const isBenar = jawabanSiswa === jawabanBenar;
+
+        const answerZone    = document.getElementById('answerZone');
+        const feedbackBar   = document.getElementById('feedbackBar');
+        const backdrop      = document.getElementById('feedbackBackdrop');
+        const actionBtn     = document.getElementById('feedbackActionBtn');
+
+        function showPopup() {
+            backdrop.classList.add('show');
+        }
+        function hidePopup() {
+            feedbackBar.className = 'feedback-bar';
+            backdrop.classList.remove('show');
+        }
+
+        if (isBenar) {
+            feedbackVisible = true;
+            playCorrect();
+            skor += 100;
+            document.getElementById('skorDisplay').textContent = skor;
+            answerZone.classList.add('correct');
+            feedbackBar.className = 'feedback-bar show correct-bar';
+            document.getElementById('feedbackTitle').innerHTML =
+                `<lottie-player src="check-box.json" background="transparent" speed="1" style="width:26px;height:26px;" loop autoplay></lottie-player> Jawaban Benar!`;
+            document.getElementById('feedbackText').textContent = `+100 poin! Jawabannya: "${soal.jawaban}"`;
+            questionStates[soalIndex] = 'correct';
+            renderNavDots();
+            simpanSkorLive();
+            const next = getNextQuestion();
+            actionBtn.textContent = next !== -1 ? 'Lanjut →' : '🏁 Lihat Hasil!';
+            actionBtn.onclick = () => {
+                hidePopup();
+                if (next !== -1) { soalIndex = next; tampilkanSoal(); }
+                else { selesai(); }
+            };
+            showPopup();
+
+        } else {
+            feedbackVisible = true;
+            playWrong();
+            answerZone.classList.add('wrong', 'shake');
+            feedbackBar.className = 'feedback-bar show wrong-bar';
+            document.getElementById('feedbackTitle').textContent = '❌ Kurang Tepat!';
+            document.getElementById('feedbackText').textContent = 'Susun ulang jawabanmu dan coba lagi!';
+            actionBtn.textContent = 'Coba Lagi';
+            actionBtn.onclick = () => {
+                hidePopup();
+                answerZone.classList.remove('shake', 'wrong');
+                feedbackVisible = false;
+            };
+            showPopup();
+
+            // Juga buka kembali interaksi setelah animasi shake selesai
+            setTimeout(() => answerZone.classList.remove('shake', 'wrong'), 550);
+            // Auto-tutup popup salah setelah 4 detik jika belum diklik
+            setTimeout(() => {
+                if (feedbackBar.classList.contains('show')) {
+                    hidePopup();
+                    feedbackVisible = false;
+                }
+            }, 4000);
+        }
+    };
+
+    // ===== LEWATI =====
+    window.lewati = function() {
+        if (feedbackVisible) return;
+        questionStates[soalIndex] = 'skipped';
+        renderNavDots();
+        const next = getNextQuestion();
+        if (next !== -1) { soalIndex = next; tampilkanSoal(); }
+        else { selesai(); }
+    };
+
+    // ===== LANJUT =====
+    window.lanjut = function() {
+        soalIndex++;
+        tampilkanSoal();
+    };
+
+    // ===== SELESAI =====
+    async function selesai() {
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('finalScore').textContent = skor;
+        document.getElementById('finishScreen').classList.add('show');
+        try {
+            if (sesiRef) {
+                await updateDoc(sesiRef, {
+                    hasil: arrayUnion({ nama, avatar, skor, selesai_pada: new Date().toISOString() })
+                });
+            }
+        } catch(e) {
+            console.error('Gagal simpan skor:', e);
+        }
+    }
+
+    // ===== POPUP PEMENANG =====
+    function tampilkanPemenang(hasilFinal) {
+        document.getElementById('finishScreen').classList.remove('show');
+        document.getElementById('winnerOverlay').classList.add('show');
+
+        const podiumEl = document.getElementById('winnerPodium');
+        podiumEl.innerHTML = '';
+        [1, 0, 2].forEach(pos => {
+            const s = hasilFinal[pos];
+            if (!s) return;
+            const medal      = pos === 0 ? '🥇' : pos === 1 ? '🥈' : '🥉';
+            const blockClass = pos === 0 ? 'wp-1' : pos === 1 ? 'wp-2' : 'wp-3';
+            const isMe       = s.nama === nama;
+            const slot = document.createElement('div');
+            slot.className = 'wp-slot';
+            slot.innerHTML = `
+                <div class="wp-medal">${medal}</div>
+                <div class="wp-avatar"><lottie-player src="${s.avatar}" background="transparent" speed="1" style="width:52px;height:52px;" loop autoplay></lottie-player></div>
+                <div class="wp-name${isMe ? ' is-me' : ''}">${s.nama}${isMe ? ' (Kamu)' : ''}</div>
+                <div class="wp-score">${s.skor} pts</div>
+                <div class="wp-block ${blockClass}"></div>
+            `;
+            podiumEl.appendChild(slot);
+        });
+
+        const myIdx = hasilFinal.findIndex(h => h.nama === nama);
+        const rankLabel  = document.getElementById('myRankValue');
+        const scoreLabel = document.getElementById('myRankScore');
+        if (myIdx !== -1) {
+            const medals = ['🥇', '🥈', '🥉'];
+            rankLabel.textContent  = myIdx < 3 ? medals[myIdx] : `#${myIdx + 1}`;
+            scoreLabel.textContent = `${hasilFinal[myIdx].skor} poin`;
+        } else {
+            rankLabel.textContent  = '—';
+            scoreLabel.textContent = 'Skor belum tercatat';
+        }
+
+        const selesaiCount = hasilFinal.filter(h => h.selesai).length;
+        document.getElementById('winnerSubtitle').textContent =
+            `${selesaiCount} dari ${hasilFinal.length} siswa menyelesaikan semua soal`;
+    }
+
+    // ===== LISTENER: deteksi guru akhiri game =====
+    let sudahTampilPemenang = false;
+    if (sesiRef) {
+        onSnapshot(sesiRef, (snap) => {
+            if (!snap.exists() || sudahTampilPemenang) return;
+            const data = snap.data();
+            if (data.status === 'selesai' && data.hasil_final) {
+                sudahTampilPemenang = true;
+                setTimeout(() => tampilkanPemenang(data.hasil_final), 800);
+            }
+        });
+    }
+
+    muatSoal();
+</script>
+
+</body>
+</html>

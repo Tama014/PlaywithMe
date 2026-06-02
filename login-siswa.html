@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <title>Masuk Siswa</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffffe; --headline-color: #272343; --paragraph-color: #2d334a;
+            --button-bg: #ffd803; --button-text: #272343; --stroke-color: #272343;
+            --secondary-color: #e3f6f5; --tertiary-color: #bae8e8;
+            --danger-color: #ff8906; --page-bg: #edf7f7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--page-bg);
+            background-image: radial-gradient(circle, #c4e8e8 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--paragraph-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            padding: 12px 40px;
+            background-color: var(--bg-color);
+            border-bottom: 3px solid var(--stroke-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 0 var(--stroke-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .brand-name {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--headline-color);
+            letter-spacing: -0.5px;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+        }
+
+        /* ===== CARD ===== */
+        .login-card {
+            background-color: var(--bg-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 8px 8px 0px var(--stroke-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--tertiary-color) 100%);
+            border-bottom: 3px solid var(--stroke-color);
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .card-header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--headline-color);
+            margin-bottom: 6px;
+        }
+        .card-header p {
+            font-size: 14px;
+            color: var(--paragraph-color);
+            opacity: 0.75;
+            line-height: 1.5;
+        }
+
+        .card-body {
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        /* ===== SECTION LABELS ===== */
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--paragraph-color);
+            opacity: 0.5;
+            margin-bottom: 8px;
+        }
+
+        /* ===== PIN INPUT ===== */
+        .pin-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: 12px;
+            text-align: center;
+            border: 3px solid var(--stroke-color);
+            border-radius: 14px;
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+        }
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background-color: #fffdf0;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+        .pin-input::placeholder { color: rgba(39,35,67,0.2); letter-spacing: 8px; }
+
+        /* ===== NAME INPUT ===== */
+        .name-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 3px solid var(--stroke-color);
+            border-radius: 12px;
+            background-color: var(--bg-color);
+            color: var(--headline-color);
+            transition: all 0.15s;
+        }
+        .name-input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            background-color: #fffdf0;
+            box-shadow: 4px 4px 0 var(--stroke-color);
+        }
+
+        /* ===== AVATAR GRID ===== */
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .avatar-grid input[type="radio"] { display: none; }
+        .avatar-label {
+            background-color: var(--secondary-color);
+            border: 3px solid var(--stroke-color);
+            border-radius: 16px;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 3px 3px 0 var(--stroke-color);
+        }
+        .avatar-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 3px 6px 0 var(--stroke-color);
+        }
+        .avatar-grid input[type="radio"]:checked + .avatar-label {
+            background-color: var(--button-bg);
+            transform: translateY(-4px) scale(1.06);
+            box-shadow: 4px 8px 0 var(--stroke-color);
+        }
+
+        /* ===== ERROR ===== */
+        .error-msg {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #dc2626;
+            display: none;
+        }
+
+        /* ===== JOIN BUTTON ===== */
+        .btn-join {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 3px solid var(--stroke-color);
+            padding: 16px 24px;
+            font-size: 19px;
+            font-weight: 900;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 6px 6px 0 var(--stroke-color);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-join:hover:not(:disabled) { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 var(--stroke-color); }
+        .btn-join:active:not(:disabled) { transform: translate(6px,6px); box-shadow: none; }
+        .btn-join:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== BACK LINK ===== */
+        .back-link {
+            display: block;
+            text-align: center;
+            padding: 16px;
+            color: var(--paragraph-color);
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            border-top: 3px solid var(--stroke-color);
+            background-color: var(--secondary-color);
+            transition: background 0.15s;
+        }
+        .back-link:hover { background-color: var(--tertiary-color); }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 640px) {
+            header { padding: 10px 20px; }
+            .brand-name { font-size: 18px; }
+            .container { padding: 16px 12px; align-items: flex-start; }
+            .login-card { border-radius: 20px; box-shadow: 4px 4px 0px var(--stroke-color); }
+            .card-header { padding: 20px 20px; }
+            .card-header h1 { font-size: 21px; }
+            .card-header p { font-size: 13px; }
+            .card-body { padding: 20px 16px; gap: 18px; }
+            .section-label { font-size: 10px; letter-spacing: 1px; opacity: 0.65; }
+            .pin-input { font-size: 24px; letter-spacing: 10px; padding: 14px 16px; }
+            .name-input { font-size: 15px; padding: 12px 14px; }
+            .avatar-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .avatar-label { height: 72px; border-radius: 14px; box-shadow: 2px 2px 0 var(--stroke-color); }
+            .avatar-label lottie-player { width: 46px !important; height: 46px !important; }
+            .btn-join { font-size: 17px; padding: 14px 20px; box-shadow: 4px 4px 0 var(--stroke-color); }
+            .back-link { font-size: 13px; padding: 14px; }
+        }
+
+        @media (max-width: 390px) {
+            .avatar-grid { gap: 6px; }
+            .avatar-label { height: 64px; border-radius: 12px; }
+            .pin-input { font-size: 22px; letter-spacing: 8px; }
+            .card-body { padding: 16px 14px; gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <lottie-player src="PlaywithMe.json" background="transparent" speed="1"
+        style="width: 42px; height: 42px;" loop autoplay>
+    </lottie-player>
+    <span class="brand-name">PlaywithME</span>
+</header>
+
+<div class="container">
+    <div class="login-card">
+
+        <div class="card-header">
+            <h1>Masuk ke Kelas</h1>
+            <p>Masukkan PIN dari gurumu, tulis namamu,<br>dan pilih karakter favoritmu!</p>
+        </div>
+
+        <div class="card-body">
+
+            <!-- 1. PIN -->
+            <div>
+                <div class="section-label">1 · PIN Ruangan</div>
+                <input type="text" id="pinInput" class="pin-input"
+                    placeholder="• • • • • •" maxlength="6"
+                    required autocomplete="off" inputmode="numeric">
+            </div>
+
+            <!-- 2. Nama -->
+            <div>
+                <div class="section-label">2 · Nama Panggilan</div>
+                <input type="text" id="namaSiswa" class="name-input"
+                    placeholder="Misal: Budi" maxlength="15"
+                    required autocomplete="off">
+            </div>
+
+            <!-- 3. Avatar -->
+            <div>
+                <div class="section-label">3 · Pilih Karakter</div>
+                <div class="avatar-grid">
+                    <input type="radio" name="avatar" id="av1" value="dog.json" required>
+                    <label for="av1" class="avatar-label">
+                        <lottie-player src="dog.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av2" value="fox.json">
+                    <label for="av2" class="avatar-label">
+                        <lottie-player src="fox.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av3" value="panda.json">
+                    <label for="av3" class="avatar-label">
+                        <lottie-player src="panda.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av4" value="tiger.json">
+                    <label for="av4" class="avatar-label">
+                        <lottie-player src="tiger.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av5" value="frog.json">
+                    <label for="av5" class="avatar-label">
+                        <lottie-player src="frog.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av6" value="butterfly.json">
+                    <label for="av6" class="avatar-label">
+                        <lottie-player src="butterfly.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av7" value="lion.json">
+                    <label for="av7" class="avatar-label">
+                        <lottie-player src="lion.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+
+                    <input type="radio" name="avatar" id="av8" value="penguin.json">
+                    <label for="av8" class="avatar-label">
+                        <lottie-player src="penguin.json" background="transparent" speed="1"
+                            style="width: 58px; height: 58px;" loop autoplay></lottie-player>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div id="errorMsg" class="error-msg"></div>
+
+            <!-- Tombol Gabung -->
+            <button class="btn-join" id="joinBtn" onclick="bergabung()">
+                <lottie-player src="login-game.json" background="transparent" speed="1"
+                    style="width: 32px; height: 32px;" loop autoplay>
+                </lottie-player>
+                Gabung Bermain!
+            </button>
+
+        </div>
+
+        <a href="index.html" class="back-link">← Batal dan Kembali</a>
+    </div>
+</div>
+
+<script type="module">
+    import { db } from "./firebase-config.js";
+    import { doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // Pre-fill PIN dari URL (QR Code atau redirect setelah keluar)
+    const params = new URLSearchParams(window.location.search);
+    const pinFromUrl = params.get('pin');
+    if (pinFromUrl) document.getElementById('pinInput').value = pinFromUrl;
+
+    function showError(msg) {
+        const el = document.getElementById('errorMsg');
+        el.textContent = msg;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 4000);
+    }
+
+    function resetBtn() {
+        const btn = document.getElementById('joinBtn');
+        btn.disabled = false;
+        btn.innerHTML = `
+            <lottie-player src="login-game.json" background="transparent" speed="1"
+                style="width:32px;height:32px;" loop autoplay></lottie-player>
+            Gabung Bermain!`;
+    }
+
+    window.bergabung = async function() {
+        const pin      = document.getElementById('pinInput').value.trim();
+        const nama     = document.getElementById('namaSiswa').value.trim();
+        const avatarEl = document.querySelector('input[name="avatar"]:checked');
+        const joinBtn  = document.getElementById('joinBtn');
+
+        if (!pin || pin.length !== 6) { showError('⚠️ PIN harus 6 digit angka!'); return; }
+        if (!nama)    { showError('⚠️ Nama panggilan tidak boleh kosong!'); return; }
+        if (!avatarEl){ showError('⚠️ Pilih karakter terlebih dahulu!'); return; }
+
+        const avatar = avatarEl.value;
+        joinBtn.disabled = true;
+        joinBtn.innerHTML = `<lottie-player src="hourglass.json" background="transparent" speed="1" style="width:28px;height:28px;" loop autoplay></lottie-player> Memeriksa PIN...`;
+
+        try {
+            const sesiRef  = doc(db, "sesi", pin);
+            const sesiSnap = await getDoc(sesiRef);
+
+            if (!sesiSnap.exists()) {
+                showError('❌ PIN tidak ditemukan. Minta PIN terbaru dari gurumu!');
+                resetBtn(); return;
+            }
+
+            const sesiData = sesiSnap.data();
+            if (sesiData.status !== 'menunggu') {
+                showError('⏰ Game sudah dimulai atau sesi telah berakhir!');
+                resetBtn(); return;
+            }
+
+            const siswaList = sesiData.siswa || [];
+            if (siswaList.some(s => s.nama.toLowerCase() === nama.toLowerCase())) {
+                showError('⚠️ Nama ini sudah dipakai. Gunakan nama lain!');
+                resetBtn(); return;
+            }
+
+            await updateDoc(sesiRef, { siswa: arrayUnion({ nama, avatar }) });
+
+            sessionStorage.setItem('nama_siswa',   nama);
+            sessionStorage.setItem('avatar_siswa', avatar);
+            sessionStorage.setItem('pin_siswa',    pin);
+
+            window.location.href = `lobby-siswa.html?pin=${pin}&nama=${encodeURIComponent(nama)}&avatar=${encodeURIComponent(avatar)}`;
+
+        } catch (err) {
+            showError('❌ Terjadi kesalahan: ' + err.message);
+            resetBtn();
+        }
+    };
+</script>
+
+</body>
+</html>

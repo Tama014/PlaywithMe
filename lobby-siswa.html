@@ -6,6 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <title>Menunggu Game... </title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         :root {
             --bg-color: #fffffe; --headline-color: #272343; --paragraph-color: #2d334a;
@@ -214,8 +215,8 @@
     window.pinState = pinState;
 
     if (!pinState) {
-        alert('Sesi tidak valid. Kembali ke halaman login.');
-        window.location.href = 'login-siswa.html';
+        notify('Sesi tidak valid. Kembali ke halaman login.', 'warning');
+        setTimeout(() => window.location.href = 'login-siswa.html', 1800);
     }
 
     const sesiRef = doc(db, "sesi", pinState);
@@ -296,8 +297,8 @@
         if (data.status === 'ditutup') {
             if (!sudahRedirect && !sudahKeluar) {
                 sudahRedirect = true;
-                alert('Ruangan telah ditutup oleh guru.');
-                window.location.href = 'index.html';
+                notify('Ruangan telah ditutup oleh guru.', 'info');
+                setTimeout(() => window.location.href = 'index.html', 2000);
             }
         }
     }

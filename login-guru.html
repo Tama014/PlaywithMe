@@ -6,6 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <title>Login Guru</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         /* Variabel Warna Sesuai Palet */
         :root {
@@ -227,8 +228,8 @@
                     // Jika Sukses Login
                     const user = userCredential.user;
                     console.log("Login Berhasil! UID:", user.uid);
-                    alert("Login berhasil! Mengalihkan ke Dashboard...");
-                    window.location.href = 'dashboard-guru.html';
+                    notify("Login berhasil! Mengalihkan ke Dashboard...", 'success');
+                    setTimeout(() => window.location.href = 'dashboard-guru.html', 1600);
                 })
                 .catch((error) => {
                     // Jika Gagal Login
@@ -236,11 +237,11 @@
                     console.error("Error Code:", errorCode);
                     
                     if (errorCode === 'auth/invalid-credential') {
-                        alert("Email atau kata sandi salah!");
+                        notify("Email atau kata sandi salah. Periksa kembali!", 'error');
                     } else if (errorCode === 'auth/too-many-requests') {
-                        alert("Terlalu banyak percobaan. Coba lagi nanti.");
+                        notify("Terlalu banyak percobaan. Coba lagi nanti.", 'warning');
                     } else {
-                        alert("Terjadi kesalahan: " + error.message);
+                        notify("Terjadi kesalahan: " + error.message, 'error');
                     }
                 })
                 .finally(() => {

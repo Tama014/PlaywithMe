@@ -296,6 +296,7 @@
         });
 
         if (data.status === 'berlangsung') {
+            if (data.kuis_id) sessionStorage.setItem('kuis_id_current', data.kuis_id);
             doRedirect();
         }
         if (data.status === 'ditutup') {
@@ -345,6 +346,8 @@
         try {
             const snap = await getDoc(sesiRef);
             if (snap.exists() && snap.data().status === 'berlangsung') {
+                const d = snap.data();
+                if (d.kuis_id) sessionStorage.setItem('kuis_id_current', d.kuis_id);
                 clearInterval(pollingInterval);
                 unsubscribe();
                 doRedirect();

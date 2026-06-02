@@ -6,6 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <title>Buat Kuis Baru</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         :root {
             --bg-color: #fffffe;
@@ -1133,8 +1134,8 @@
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            alert("Sesi habis. Silakan login kembali.");
-            window.location.href = 'login-guru.html';
+            notify("Sesi habis. Silakan login kembali.", 'warning');
+            setTimeout(() => window.location.href = 'login-guru.html', 1800);
         } else {
             window.currentUser = user;
             await initBankBadge(user.uid);
@@ -1153,8 +1154,8 @@
         try {
             const snap = await getDoc(doc(db, "kuis", editId));
             if (!snap.exists()) {
-                alert("Kuis tidak ditemukan.");
-                window.location.href = 'dashboard-guru.html';
+                notify("Kuis tidak ditemukan.", 'error');
+                setTimeout(() => window.location.href = 'dashboard-guru.html', 1800);
                 return;
             }
             const data = snap.data();
@@ -1167,8 +1168,8 @@
                 window.updatePreview(questionCount);
             }
         } catch (err) {
-            alert("Gagal memuat data kuis: " + err.message);
-            window.location.href = 'dashboard-guru.html';
+            notify("Gagal memuat data kuis: " + err.message, 'error');
+            setTimeout(() => window.location.href = 'dashboard-guru.html', 2000);
         }
     }
 

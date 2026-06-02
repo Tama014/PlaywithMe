@@ -8,6 +8,7 @@
     <title>Ruang Tunggu Guru</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         :root {
             --bg-color: #fffffe;
@@ -525,8 +526,8 @@
     const pin    = params.get('pin');
 
     if (!pin) {
-        alert('PIN tidak ditemukan. Kembali ke dashboard.');
-        window.location.href = 'dashboard-guru.html';
+        notify('PIN tidak ditemukan. Kembali ke dashboard.', 'error');
+        setTimeout(() => window.location.href = 'dashboard-guru.html', 1800);
     }
 
     // Tampilkan PIN segera
@@ -554,7 +555,7 @@
             const siswaBaru = currentSiswa.filter(s => s.nama !== nama);
             await updateDoc(sesiRef, { siswa: siswaBaru });
         } catch (err) {
-            alert('Gagal mengeluarkan siswa: ' + err.message);
+            notify('Gagal mengeluarkan siswa: ' + err.message, 'error');
         }
     };
 
@@ -569,7 +570,7 @@
 
     window.mulaiGame = async function() {
         if (!authReady) {
-            alert('Autentikasi belum selesai, tunggu sebentar dan coba lagi.');
+            notify('Autentikasi belum selesai, tunggu sebentar dan coba lagi.', 'warning');
             return;
         }
         const startBtn = document.getElementById('startBtn');
@@ -582,7 +583,7 @@
             console.log('✅ [Lobby Guru] Status berhasil diubah ke berlangsung!');
         } catch (err) {
             console.error('❌ [Lobby Guru] Gagal mulai game:', err.code, err.message);
-            alert('Gagal memulai game: ' + err.code + ' — ' + err.message);
+            notify('Gagal memulai game: ' + err.code + ' — ' + err.message, 'error');
             startBtn.disabled = false;
             startBtn.innerHTML = originalHTML;
         }
@@ -605,8 +606,8 @@
     onAuthStateChanged(auth, (user) => {
         if (!user) {
             console.warn('⚠️ [Lobby Guru] User tidak login, redirect ke login.');
-            alert('Sesi login habis. Silakan login kembali.');
-            window.location.href = 'login-guru.html';
+            notify('Sesi login habis. Silakan login kembali.', 'warning');
+            setTimeout(() => window.location.href = 'login-guru.html', 1800);
             return;
         }
 
@@ -664,7 +665,7 @@
             },
             (error) => {
                 console.error('❌ [Lobby Guru] onSnapshot error:', error.code, error.message);
-                alert('Error Firebase Lobby Guru: ' + error.code + ' — ' + error.message);
+                notify('Error Firebase: ' + error.code + ' — ' + error.message, 'error');
             }
         );
     });

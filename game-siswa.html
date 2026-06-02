@@ -6,6 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <title>Game</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="notify.js"></script>
     <style>
         :root {
             --bg-color: #fffffe; --headline-color: #272343; --paragraph-color: #2d334a;
@@ -659,11 +660,11 @@
     async function muatSoal() {
         try {
             const sesiSnap = await getDoc(doc(db, "sesi", pin));
-            if (!sesiSnap.exists()) { alert('Sesi tidak ditemukan.'); return; }
+            if (!sesiSnap.exists()) { notify('Sesi tidak ditemukan.', 'error'); return; }
             const sesiData = sesiSnap.data();
 
             const kuisSnap = await getDoc(doc(db, "kuis", sesiData.kuis_id));
-            if (!kuisSnap.exists()) { alert('Kuis tidak ditemukan.'); return; }
+            if (!kuisSnap.exists()) { notify('Kuis tidak ditemukan.', 'error'); return; }
 
             soalList = kuisSnap.data().soal;
             console.log('🔀 Shuffle mode:', sesiData.shuffle, '| Jumlah soal:', soalList.length);
@@ -676,7 +677,7 @@
             tampilkanSoal();
         } catch (err) {
             console.error(err);
-            alert('Gagal memuat soal: ' + err.message);
+            notify('Gagal memuat soal: ' + err.message, 'error');
         }
     }
 

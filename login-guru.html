@@ -7,6 +7,7 @@
     <title>Login Guru</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script src="notify.js"></script>
+    <script>typeof window.notify==='undefined'&&(window.notify=function(m,t){if(t!=='success'&&t!=='info')alert(m);},window.pwmClose=function(){});</script>
     <style>
         /* Variabel Warna Sesuai Palet */
         :root {
@@ -152,6 +153,16 @@
             text-decoration: underline;
         }
 
+        /* Tautan pindah form (Daftar / Lupa kata sandi) */
+        .lupa-link {
+            display: block;
+            text-align: right;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .login-box .switch-link { margin: 20px 0 0; font-size: 15px; }
+        .lupa-link, .switch-link a { color: var(--headline-color); font-weight: 800; }
+
         /* ===== RESPONSIVE MOBILE ===== */
         @media (max-width: 640px) {
             header { padding: 14px 20px; }
@@ -181,74 +192,136 @@
 
     <div class="container">
         <div class="login-box">
-            <h2>Portal Guru</h2>
-
-            <form id="loginForm">
+            <!-- Form yang tampil dipilih lewat hash URL: #daftar, #lupa, selain itu Masuk -->
+            <form id="formMasuk">
+                <h2>Portal Guru</h2>
                 <div class="form-group">
                     <label for="email">Alamat Email</label>
-                    <input type="email" id="email" placeholder="guru@sekolah.com" required>
+                    <input type="email" id="email" placeholder="guru@sekolah.com" autocomplete="username" required>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Kata Sandi</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                    <a href="#lupa" class="lupa-link">Lupa kata sandi?</a>
                 </div>
 
                 <button type="submit" class="btn">Masuk</button>
+                <p class="switch-link">Belum punya akun? <a href="#daftar">Daftar di sini</a></p>
+            </form>
+
+            <form id="formDaftar" hidden>
+                <h2>Daftar Akun Guru</h2>
+                <div class="form-group">
+                    <label for="emailDaftar">Alamat Email</label>
+                    <input type="email" id="emailDaftar" placeholder="guru@sekolah.com" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordDaftar">Kata Sandi</label>
+                    <input type="password" id="passwordDaftar" placeholder="Minimal 6 karakter" autocomplete="new-password" minlength="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="konfirmasiDaftar">Ulangi Kata Sandi</label>
+                    <input type="password" id="konfirmasiDaftar" placeholder="Ketik ulang kata sandi" autocomplete="new-password" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn">Buat Akun</button>
+                <p class="switch-link">Sudah punya akun? <a href="#masuk">Masuk</a></p>
+            </form>
+
+            <form id="formLupa" hidden>
+                <h2>Lupa Kata Sandi?</h2>
+                <p>Masukkan email akunmu. Kami akan mengirim link untuk membuat kata sandi baru.</p>
+                <div class="form-group">
+                    <label for="emailLupa">Alamat Email</label>
+                    <input type="email" id="emailLupa" placeholder="guru@sekolah.com" autocomplete="username" required>
+                </div>
+
+                <button type="submit" class="btn">Kirim Link Reset</button>
+                <p class="switch-link"><a href="#masuk">← Kembali ke Masuk</a></p>
             </form>
 
             <a href="index.html" class="back-link">← Kembali ke Halaman Utama</a>
         </div>
     </div>
 
+    <script>
+        // Tampilkan form sesuai hash URL; email yang sudah diketik ikut terbawa
+        function tampilkanForm() {
+            const aktif = document.getElementById({ '#daftar': 'formDaftar', '#lupa': 'formLupa' }[location.hash] || 'formMasuk');
+            const email = document.querySelector('.login-box form:not([hidden]) input[type="email"]').value;
+            document.querySelectorAll('.login-box form').forEach(f => f.hidden = f !== aktif);
+            if (email) aktif.querySelector('input[type="email"]').value = email;
+        }
+        window.addEventListener('hashchange', tampilkanForm);
+        tampilkanForm();
+    </script>
+
     <script type="module">
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         // Import 'auth' dari file konfigurasi yang kita buat tadi
         import { auth } from "./firebase-config.js";
 
-        const loginForm = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const submitBtn = document.querySelector('button[type="submit"]');
+        auth.languageCode = 'id'; // Email reset kata sandi dikirim dalam Bahasa Indonesia
 
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Mencegah halaman reload otomatis
-            
-            // Ubah teks tombol menjadi loading
-            const originalText = submitBtn.innerText;
-            submitBtn.innerText = "Memeriksa...";
-            submitBtn.disabled = true;
+        const PESAN_ERROR = {
+            'auth/invalid-credential':     'Email atau kata sandi salah. Periksa kembali!',
+            'auth/email-already-in-use':   'Email ini sudah terdaftar. Silakan masuk, atau klik "Lupa kata sandi?".',
+            'auth/weak-password':          'Kata sandi terlalu lemah, minimal 6 karakter.',
+            'auth/invalid-email':          'Format email tidak valid.',
+            'auth/too-many-requests':      'Terlalu banyak percobaan. Coba lagi nanti.',
+            'auth/network-request-failed': 'Gagal terhubung. Periksa koneksi internet kamu.',
+        };
 
-            const email = emailInput.value;
-            const password = passwordInput.value;
+        const nilai = (id) => document.getElementById(id).value;
 
-            // Proses Login Firebase
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // Jika Sukses Login
-                    const user = userCredential.user;
-                    console.log("Login Berhasil! UID:", user.uid);
-                    notify("Login berhasil! Mengalihkan ke Dashboard...", 'success');
-                    setTimeout(() => window.location.href = 'dashboard-guru.html', 1600);
-                })
-                .catch((error) => {
-                    // Jika Gagal Login
-                    const errorCode = error.code;
-                    console.error("Error Code:", errorCode);
-                    
-                    if (errorCode === 'auth/invalid-credential') {
-                        notify("Email atau kata sandi salah. Periksa kembali!", 'error');
-                    } else if (errorCode === 'auth/too-many-requests') {
-                        notify("Terlalu banyak percobaan. Coba lagi nanti.", 'warning');
-                    } else {
-                        notify("Terjadi kesalahan: " + error.message, 'error');
-                    }
-                })
-                .finally(() => {
-                    // Kembalikan tombol seperti semula
-                    submitBtn.innerText = originalText;
-                    submitBtn.disabled = false;
-                });
+        // Tombol jadi "loading" selama proses; error Firebase diterjemahkan ke pesan yang mudah dipahami
+        function pasangForm(idForm, teksLoading, aksi) {
+            const form = document.getElementById(idForm);
+            const btn  = form.querySelector('button[type="submit"]');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Mencegah halaman reload otomatis
+                const teksAwal = btn.innerText;
+                btn.innerText = teksLoading;
+                btn.disabled = true;
+                try {
+                    await aksi();
+                } catch (error) {
+                    console.error("Error Code:", error.code);
+                    notify(PESAN_ERROR[error.code] || "Terjadi kesalahan: " + error.message, 'error');
+                } finally {
+                    btn.innerText = teksAwal;
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        function keDashboard(pesan) {
+            notify(pesan, 'success');
+            setTimeout(() => window.location.href = 'dashboard-guru.html', 1600);
+        }
+
+        pasangForm('formMasuk', 'Memeriksa...', async () => {
+            await signInWithEmailAndPassword(auth, nilai('email'), nilai('password'));
+            keDashboard("Login berhasil! Mengalihkan ke Dashboard...");
+        });
+
+        pasangForm('formDaftar', 'Membuat akun...', async () => {
+            if (nilai('passwordDaftar') !== nilai('konfirmasiDaftar')) {
+                notify("Kata sandi dan ulangan kata sandi tidak sama.", 'error');
+                return;
+            }
+            await createUserWithEmailAndPassword(auth, nilai('emailDaftar'), nilai('passwordDaftar'));
+            keDashboard("Akun berhasil dibuat! Mengalihkan ke Dashboard...");
+        });
+
+        pasangForm('formLupa', 'Mengirim...', async () => {
+            await sendPasswordResetEmail(auth, nilai('emailLupa'));
+            // Pesan sengaja netral: Firebase tidak memberi tahu apakah email itu terdaftar
+            notify("Jika email terdaftar, link reset kata sandi sudah dikirim. Cek juga folder Spam.", 'success', 8000);
+            location.hash = 'masuk';
         });
     </script>
 

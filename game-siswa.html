@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
-    <link rel="preload" as="audio" href="correct.mp3">
-    <link rel="preload" as="audio" href="fahh.mp3">
+    <link rel="preload" as="fetch" href="correct.mp3" crossorigin>
+    <link rel="preload" as="fetch" href="fahh.mp3" crossorigin>
     <link rel="preload" as="fetch" href="check-box.json" crossorigin>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
     <script src="notify.js" defer></script>
@@ -610,31 +610,59 @@
         return -1; // Semua sudah benar → selesai
     }
 
-    // ===== AUDIO =====
-    let sfxCorrect = null, sfxWrong = null;
+    // ===== AUDIO (Web Audio API — zero-latency, works on iOS) =====
+    let audioCtx = null;
+    const audioBuffers = {};
+    let audioInitStarted = false;
 
-    function playCorrect() {
-        if (!sfxCorrect) sfxCorrect = new Audio('correct.mp3');
-        sfxCorrect.currentTime = 2;
-        sfxCorrect.play().catch(() => {});
+    async function initAudio() {
+        if (audioInitStarted) return;
+        audioInitStarted = true;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            await Promise.all(['correct.mp3', 'fahh.mp3'].map(async (file) => {
+                const res = await fetch(file);
+                const raw = await res.arrayBuffer();
+                audioBuffers[file] = await audioCtx.decodeAudioData(raw);
+            }));
+        } catch(e) {
+            console.warn('[Audio] init failed:', e);
+        }
     }
-    function playWrong() {
-        if (!sfxWrong) sfxWrong = new Audio('fahh.mp3');
-        sfxWrong.currentTime = 0;
-        sfxWrong.play().catch(() => {});
+
+    function playAudio(file, offset = 0) {
+        if (!audioCtx || !audioBuffers[file]) return;
+        const src = audioCtx.createBufferSource();
+        src.buffer = audioBuffers[file];
+        src.connect(audioCtx.destination);
+        src.start(0, offset);
     }
+
+    function playCorrect() { playAudio('correct.mp3', 1); }
+    function playWrong()   { playAudio('fahh.mp3', 0); }
 
     // ── Ambil dari URL param (utama) ATAU sessionStorage (fallback)
     const urlParams  = new URLSearchParams(window.location.search);
-    const pin    = urlParams.get('pin')    || sessionStorage.getItem('pin_siswa')    || '';
-    const nama   = urlParams.get('nama')   ? decodeURIComponent(urlParams.get('nama'))
+    // Free Mode: guru membuka kuis langsung lewat ?kuis=<id>, tanpa sesi dan tanpa PIN
+    const kuisFree = urlParams.get('kuis');
+    const freeMode = !!kuisFree;
+
+    const pin    = freeMode ? '' : (urlParams.get('pin') || sessionStorage.getItem('pin_siswa') || '');
+    const nama   = freeMode ? 'Guru'
+                 : urlParams.get('nama')   ? decodeURIComponent(urlParams.get('nama'))
                                            : (sessionStorage.getItem('nama_siswa')  || 'Siswa');
-    const avatar = urlParams.get('avatar') ? decodeURIComponent(urlParams.get('avatar'))
+    const avatar = freeMode ? 'teacher.json'
+                 : urlParams.get('avatar') ? decodeURIComponent(urlParams.get('avatar'))
                                            : (sessionStorage.getItem('avatar_siswa') || 'dog.json');
 
-    if (pin)    sessionStorage.setItem('pin_siswa',    pin);
-    if (nama)   sessionStorage.setItem('nama_siswa',   nama);
-    if (avatar) sessionStorage.setItem('avatar_siswa', avatar);
+    if (freeMode) {
+        // Selesai bermain → kembali ke Dashboard guru, bukan ke menu siswa
+        document.querySelector('.finish-btn').onclick = () => window.location.href = 'dashboard-guru.html';
+    } else {
+        if (pin)    sessionStorage.setItem('pin_siswa',    pin);
+        if (nama)   sessionStorage.setItem('nama_siswa',   nama);
+        if (avatar) sessionStorage.setItem('avatar_siswa', avatar);
+    }
 
     document.getElementById('avatarMini').innerHTML =
         `<lottie-player src="${avatar}" background="transparent" speed="1" style="width:42px;height:42px;" loop autoplay></lottie-player>`;
@@ -659,28 +687,84 @@
         return a;
     }
 
+    // ===== KATA PENGECOH =====
+    // Tingkat & jumlahnya diatur guru saat membuat kuis (default: mudah, 3 kata)
+    let levelPengecoh  = 'mudah';
+    let jumlahPengecoh = 3;
+
+    const KATA_UMUM = [
+        'adalah', 'dari', 'dan', 'di', 'ke', 'juga', 'sudah', 'bukan', 'tetapi', 'pada',
+        'untuk', 'dengan', 'yang', 'atau', 'akan', 'agar', 'oleh', 'saat', 'karena', 'supaya',
+        'sebuah', 'para', 'itu', 'ini', 'hanya', 'masih', 'sangat', 'dalam', 'setelah', 'sambil'
+    ];
+    const IMBUHAN_DEPAN    = ['me', 'di', 'ber', 'ter', 'pe', 'se', 'meng', 'ke'];
+    const IMBUHAN_BELAKANG = ['nya', 'kan', 'an', 'lah', 'pun', 'ku', 'mu'];
+
+    // Kata dari jawaban soal lain di kuis yang sama — masih satu tema, jadi lebih menipu
+    function kataSoalLain() {
+        return soalList.flatMap((s, i) =>
+            i === soalIndex ? [] : (s.kata_jawaban || s.jawaban.split(' ').filter(k => k)));
+    }
+
+    // Bentuk mirip kata jawaban (imbuhan ditambahkan) — siswa harus membaca teliti
+    function bentukMirip(kataJawaban) {
+        return kataJawaban.filter(k => k.length >= 4).flatMap(k => {
+            const dasar = k.toLowerCase();
+            return [...IMBUHAN_BELAKANG.map(a => dasar + a), ...IMBUHAN_DEPAN.map(a => a + dasar)];
+        });
+    }
+
+    function buatPengecoh(kataJawaban) {
+        if (jumlahPengecoh < 1) return [];
+        // Sumber utama di depan; kalau katanya kurang, baru ambil dari cadangan di belakangnya
+        const sumber = {
+            sulit:  [bentukMirip(kataJawaban), kataSoalLain(), KATA_UMUM],
+            sedang: [kataSoalLain(), KATA_UMUM],
+            mudah:  [KATA_UMUM],
+        }[levelPengecoh] || [KATA_UMUM];
+
+        const terpakai = new Set(kataJawaban.map(k => k.toLowerCase()));
+        const hasil = [];
+        for (const daftar of sumber) {
+            for (const kata of fisherYatesShuffle(daftar)) {
+                if (hasil.length >= jumlahPengecoh) return hasil;
+                if (terpakai.has(kata.toLowerCase())) continue; // jangan bentrok dengan kata jawaban
+                terpakai.add(kata.toLowerCase());
+                hasil.push(kata);
+            }
+        }
+        return hasil;
+    }
+
     // ===== MUAT SOAL =====
     const cachedKuisId = sessionStorage.getItem('kuis_id_current');
 
     async function muatSoal() {
         try {
-            // Fire both reads in parallel when kuis_id is already known from lobby
-            const sesiPromise = getDoc(doc(db, "sesi", pin));
-            const kuisPromise = cachedKuisId ? getDoc(doc(db, "kuis", cachedKuisId)) : null;
+            let kuisSnap, acakSoal = false;
 
-            const sesiSnap = await sesiPromise;
-            if (!sesiSnap.exists()) { notify('Sesi tidak ditemukan.', 'error'); return; }
-            const sesiData = sesiSnap.data();
+            if (freeMode) {
+                kuisSnap = await getDoc(doc(db, "kuis", kuisFree));
+            } else {
+                // Fire both reads in parallel when kuis_id is already known from lobby
+                const sesiPromise = getDoc(doc(db, "sesi", pin));
+                const kuisPromise = cachedKuisId ? getDoc(doc(db, "kuis", cachedKuisId)) : null;
 
-            const kuisSnap = await (kuisPromise || getDoc(doc(db, "kuis", sesiData.kuis_id)));
+                const sesiSnap = await sesiPromise;
+                if (!sesiSnap.exists()) { notify('Sesi tidak ditemukan.', 'error'); return; }
+                const sesiData = sesiSnap.data();
+                acakSoal = sesiData.shuffle === true;
+
+                kuisSnap = await (kuisPromise || getDoc(doc(db, "kuis", sesiData.kuis_id)));
+            }
+
             if (!kuisSnap.exists()) { notify('Kuis tidak ditemukan.', 'error'); return; }
 
-            soalList = kuisSnap.data().soal;
-            console.log('🔀 Shuffle mode:', sesiData.shuffle, '| Jumlah soal:', soalList.length);
-            if (sesiData.shuffle === true) {
-                soalList = fisherYatesShuffle(soalList);
-                console.log('✅ Soal berhasil diacak');
-            }
+            const kuis = kuisSnap.data();
+            soalList       = acakSoal ? fisherYatesShuffle(kuis.soal) : kuis.soal;
+            levelPengecoh  = kuis.level_pengecoh  || 'mudah';
+            jumlahPengecoh = kuis.jumlah_pengecoh ?? 3;
+
             questionStates = new Array(soalList.length).fill('unanswered');
             document.getElementById('soalTotal').textContent = soalList.length;
             tampilkanSoal();
@@ -716,11 +800,7 @@
         document.getElementById('feedbackBackdrop').classList.remove('show');
 
         const kataJawaban = soal.kata_jawaban || soal.jawaban.split(' ').filter(k => k);
-        const kataAcak = [...kataJawaban].sort(() => Math.random() - 0.5);
-
-        const pengecoh = ['adalah', 'dari', 'dan', 'di', 'ke', 'juga', 'sudah', 'bukan', 'tetapi'];
-        const acakPengecoh = pengecoh.sort(() => Math.random() - 0.5).slice(0, Math.min(3, soalList.length));
-        const semuaKata = [...kataAcak, ...acakPengecoh].sort(() => Math.random() - 0.5);
+        const semuaKata = fisherYatesShuffle([...kataJawaban, ...buatPengecoh(kataJawaban)]);
 
         const wordBank = document.getElementById('wordBank');
         wordBank.innerHTML = '';
@@ -741,6 +821,7 @@
 
     // ===== PILIH KATA =====
     window.pilihKata = function(chip) {
+        initAudio(); // unlock AudioContext & preload buffers on first user gesture
         if (chip.classList.contains('selected') || feedbackVisible) return;
         const fb = document.getElementById('feedbackBar');
         if (fb.classList.contains('wrong-bar')) fb.className = 'feedback-bar';

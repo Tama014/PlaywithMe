@@ -7,6 +7,7 @@
     <title>Buat Kuis Baru</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script src="notify.js"></script>
+    <script>typeof window.notify==='undefined'&&(window.notify=function(m,t){if(t!=='success'&&t!=='info')alert(m);},window.pwmClose=function(){});</script>
     <style>
         :root {
             --bg-color: #fffffe;
@@ -964,6 +965,34 @@
                     </select>
                 </div>
             </div>
+
+            <div class="form-row" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label>Mode Permainan</label>
+                    <select id="modeKuis">
+                        <option value="normal">Normal — siswa main di HP (pakai PIN)</option>
+                        <option value="free">Free Mode — tanpa PIN, guru yang menyusun</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label>Tingkat Kata Pengecoh</label>
+                    <select id="levelPengecoh">
+                        <option value="mudah">Mudah — kata umum</option>
+                        <option value="sedang">Sedang — kata dari soal lain</option>
+                        <option value="sulit">Sulit — mirip kata jawaban</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Kata Pengecoh</label>
+                    <input type="number" id="jumlahPengecoh" value="3" min="0" max="10">
+                </div>
+            </div>
+
+            <p class="tip" style="margin-top: 18px;">🎤 <b>Free Mode</b> untuk kelas yang siswanya tidak boleh membawa HP: soal tampil di layar kelas, siswa menyebutkan susunan katanya, lalu guru yang menyusun kata. Kuis Free Mode dibuka langsung dari Dashboard tanpa PIN.</p>
+            <p class="tip" style="margin-top: 10px;">🔤 <b>Kata pengecoh</b> adalah kata tambahan yang bukan bagian dari jawaban. <b>Mudah</b>: kata umum yang jelas tidak nyambung. <b>Sedang</b>: kata dari jawaban soal lain di kuis ini. <b>Sulit</b>: bentuk mirip kata jawaban, misalnya "makan" menjadi "memakan".</p>
         </div>
     </div>
 
@@ -1161,6 +1190,9 @@
             const data = snap.data();
             document.getElementById('judulKuis').value = data.judul;
             document.getElementById('mataPelajaran').value = data.mata_pelajaran;
+            document.getElementById('modeKuis').value = data.mode || 'normal';
+            document.getElementById('levelPengecoh').value = data.level_pengecoh || 'mudah';
+            document.getElementById('jumlahPengecoh').value = data.jumlah_pengecoh ?? 3;
             for (const soal of data.soal) {
                 window.tambahSoal();
                 document.getElementById(`pertanyaan-${questionCount}`).value = soal.pertanyaan;
@@ -1271,6 +1303,11 @@
 
         const judul = document.getElementById('judulKuis').value.trim();
         const mapel = document.getElementById('mataPelajaran').value;
+        const pengaturan = {
+            mode: document.getElementById('modeKuis').value,
+            level_pengecoh: document.getElementById('levelPengecoh').value,
+            jumlah_pengecoh: Math.max(0, Math.min(10, parseInt(document.getElementById('jumlahPengecoh').value) || 0)),
+        };
 
         if (!judul) { showStatus('⚠️ Harap isi judul kuis!'); return; }
         if (!mapel) { showStatus('⚠️ Harap pilih mata pelajaran!'); return; }
@@ -1314,6 +1351,7 @@
                 await updateDoc(doc(db, "kuis", editId), {
                     judul: judul,
                     mata_pelajaran: mapel,
+                    ...pengaturan,
                     soal: soalList,
                     jumlah_soal: soalList.length,
                     diperbarui_pada: serverTimestamp()
@@ -1323,6 +1361,7 @@
                 const docRef = await addDoc(collection(db, "kuis"), {
                     judul: judul,
                     mata_pelajaran: mapel,
+                    ...pengaturan,
                     soal: soalList,
                     guru_uid: window.currentUser.uid,
                     dibuat_pada: serverTimestamp(),

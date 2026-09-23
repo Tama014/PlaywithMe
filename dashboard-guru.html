@@ -7,6 +7,7 @@
     <title>Dashboard Guru</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script src="notify.js"></script>
+    <script>typeof window.notify==='undefined'&&(window.notify=function(m,t){if(t!=='success'&&t!=='info')alert(m);},window.pwmClose=function(){});</script>
     <style>
         :root {
             --bg-color: #fffffe;
@@ -206,6 +207,7 @@
         }
         .badge-mapel { background: var(--tertiary-color); }
         .badge-soal { background: var(--button-bg); }
+        .badge-free { background: #3da9fc; color: white; }
 
         .kuis-actions { display: flex; gap: 10px; flex-shrink: 0; }
 
@@ -523,6 +525,8 @@
                 item.className = 'kuis-item';
                 const safeId    = docSnap.id;
                 const safeJudul = data.judul.replace(/'/g, "\\'");
+                // Free Mode: dibuka langsung tanpa PIN, guru yang menyusun kata di layar kelas
+                const isFree    = data.mode === 'free';
                 item.innerHTML = `
                     <input type="checkbox" class="kuis-checkbox" data-id="${safeId}" title="Pilih untuk digabung">
                     <div class="kuis-info">
@@ -530,10 +534,11 @@
                         <div class="kuis-meta">
                             <span class="badge badge-mapel">📖 ${data.mata_pelajaran}</span>
                             <span class="badge badge-soal">📝 ${data.jumlah_soal} soal</span>
+                            ${isFree ? `<span class="badge badge-free">🎤 Free Mode</span>` : ``}
                         </div>
                     </div>
                     <div class="kuis-actions">
-                        <button class="btn-sm btn-start" onclick="mulaiGame('${safeId}', '${safeJudul}')"><lottie-player src="start.json" background="transparent" speed="1" style="width: 20px; height: 20px;" loop autoplay></lottie-player> Mulai Game</button>
+                        <button class="btn-sm btn-start" onclick="${isFree ? `window.location.href='game-siswa.html?kuis=${safeId}'` : `mulaiGame('${safeId}', '${safeJudul}')`}"><lottie-player src="start.json" background="transparent" speed="1" style="width: 20px; height: 20px;" loop autoplay></lottie-player> ${isFree ? 'Buka Kuis' : 'Mulai Game'}</button>
                         <button class="btn-sm btn-edit" onclick="editKuis('${safeId}')"><lottie-player src="edit.json" background="transparent" speed="1" style="width: 20px; height: 20px;" loop autoplay></lottie-player> Edit</button>
                         <button class="btn-sm btn-hapus" onclick="konfirmasiHapus('${safeId}', '${safeJudul}')">🗑</button>
                     </div>
